@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:final_project_2/screens/detail_screen.dart';
 import 'package:final_project_2/screens/profile_screen.dart';
 import 'package:final_project_2/models/wish_item.dart';
+import 'package:final_project_2/models/wish_model.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -68,27 +70,19 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void toggleDone(String id) {
-  setState(() {
-    // Cari indeks item berdasarkan id
-    final index = wishes.indexWhere((wish) => wish.id == id);
-
-    if (index != -1) {
-      // Hapus item dari daftar dan simpan dalam variabel
-      final wish = wishes.removeAt(index);
-
-      // Ubah status isDone
-      wish.isDone = !wish.isDone;
-
-      // Tambahkan kembali ke posisi sesuai status
-      if (wish.isDone) {
-        wishes.add(wish); // Jika selesai (done), tambahkan ke bawah
-      } else {
-        wishes.insert(0, wish); // Jika belum selesai (undone), tambahkan ke atas
+    setState(() {
+      final index = wishes.indexWhere((wish) => wish.id == id);
+      if (index != -1) {
+        final wish = wishes.removeAt(index);
+        wish.isDone = !wish.isDone;
+        if (wish.isDone) {
+          wishes.add(wish);
+        } else {
+          wishes.insert(0, wish);
+        }
       }
-    }
-  });
-}
-
+    });
+  }
 
   void deleteWish(String id) {
     setState(() {
@@ -98,6 +92,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final wishModel = Provider.of<WishModel>(context);
+    
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -268,35 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex:0,
-        selectedItemColor: Colors.blue[900],
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'Add',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-          if (index == 2) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => ProfileScreen()),
-            );
-          }
-        },
-      ),
+      
     );
   }
 }

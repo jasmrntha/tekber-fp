@@ -1,9 +1,14 @@
+// lib/screens/profile_screen.dart
+
 import 'package:flutter/material.dart';
-import 'package:final_project_2/screens/home_screen.dart';
+import 'package:final_project_2/models/wish_model.dart';
+import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final wishModel = Provider.of<WishModel>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -11,7 +16,7 @@ class ProfileScreen extends StatelessWidget {
           style: TextStyle(color: Colors.yellow, fontFamily: 'Poppins'),
         ),
         backgroundColor: Colors.blue[900],
-        automaticallyImplyLeading: false
+        automaticallyImplyLeading: false,
       ),
       body: Center(
         child: Column(
@@ -36,43 +41,10 @@ class ProfileScreen extends StatelessWidget {
                 // Implement logout logic here
               },
               style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(255, 169, 199, 243)),
-              child: const Text('LOGOUT', style: TextStyle(fontFamily: 'Poppins', color: Colors.black)),
+              child: const Text('Logout', style: TextStyle(fontFamily: 'Poppins', color: Colors.black)),
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 2,
-        selectedItemColor: Colors.blue[900],
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'Add',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => HomeScreen()),
-            );
-          } else if (index == 1) {
-            
-          } else if (index == 2) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => ProfileScreen()),
-            );
-          }
-        },
       ),
     );
   }

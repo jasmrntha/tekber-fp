@@ -113,11 +113,11 @@ class _DetailScreenState extends State<DetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildDetailRow('Note', widget.wish.note),
+                  _buildDetailRow('Note \t \t \t \t ', widget.wish.note),
                   SizedBox(height: 8),
-                  _buildDetailRow('Price', 'Rp. $formattedPrice'),
+                  _buildDetailRow('Price \t \t \t \t ', 'Rp. $formattedPrice'),
                   SizedBox(height: 8),
-                  _buildDetailRow('Link', widget.wish.link),
+                  _buildDetailRow('Link \t \t \t \t \t ', widget.wish.link),
                   SizedBox(height: 8),
                   _buildDetailRow('Category', widget.wish.category),
                 ],
