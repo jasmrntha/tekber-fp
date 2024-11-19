@@ -1,13 +1,10 @@
 // lib/screens/profile_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:final_project_2/models/wish_model.dart';
-import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final wishModel = Provider.of<WishModel>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -41,7 +38,7 @@ class ProfileScreen extends StatelessWidget {
                 // Implement logout logic here
               },
               style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(255, 169, 199, 243)),
-              child: const Text('Logout', style: TextStyle(fontFamily: 'Poppins', color: Colors.black)),
+              child: const Text('Logout', ),
             ),
           ],
         ),

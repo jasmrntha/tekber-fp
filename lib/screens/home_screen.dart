@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:final_project_2/screens/detail_screen.dart';
-import 'package:final_project_2/screens/profile_screen.dart';
 import 'package:final_project_2/models/wish_item.dart';
-import 'package:final_project_2/models/wish_model.dart';
-import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -50,7 +47,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String _searchQuery = '';
   String _filter = 'All';
-  int _currentIndex = 0;
 
   List<String> getFilters() {
     final categories = wishes.map((wish) => wish.category).toSet().toList();
@@ -92,7 +88,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final wishModel = Provider.of<WishModel>(context);
     
     return Scaffold(
       appBar: AppBar(
