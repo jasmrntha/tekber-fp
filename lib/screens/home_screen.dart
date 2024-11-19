@@ -11,6 +11,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final List<WishItem> wishes = [
     WishItem(
+      id: '1',
       title: 'Jaket Coach KAWS + Warhol',
       note: 'Ukuran S, warna navy',
       price: 499000,
@@ -22,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
       category: 'Fashion',
     ),
     WishItem(
+      id: '2',
       title: 'New Balance 530 Unisex',
       note: 'Ukuran 41, warna silver',
       price: 1599000,
@@ -32,8 +34,9 @@ class _HomeScreenState extends State<HomeScreen> {
       category: 'Sport',
     ),
     WishItem(
-      title: 'New Balance 530 Unisex',
-      note: 'Ukuran 38, warna silver',
+      id: '3',
+      title: 'New Balance 530 Kids',
+      note: 'Ukuran 20, warna putih',
       price: 1599000,
       image: [
         'assets/images/nb_530.jpg',
@@ -43,9 +46,9 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
   ];
 
-  int _currentIndex = 0;
   String _searchQuery = '';
   String _filter = 'All';
+  int _currentIndex = 0;
 
   List<String> getFilters() {
     final categories = wishes.map((wish) => wish.category).toSet().toList();
@@ -64,19 +67,34 @@ class _HomeScreenState extends State<HomeScreen> {
     }).toList();
   }
 
-  void toggleDone(int index) {
-    setState(() {
-      final wish = wishes.removeAt(index); // Hapus item dari posisi awal
-      wish.isDone = !wish.isDone; // Ubah status
+  void toggleDone(String id) {
+  setState(() {
+    // Cari indeks item berdasarkan id
+    final index = wishes.indexWhere((wish) => wish.id == id);
+
+    if (index != -1) {
+      // Hapus item dari daftar dan simpan dalam variabel
+      final wish = wishes.removeAt(index);
+
+      // Ubah status isDone
+      wish.isDone = !wish.isDone;
+
       // Tambahkan kembali ke posisi sesuai status
       if (wish.isDone) {
-        wishes.add(wish); // Tambahkan ke bawah
+        wishes.add(wish); // Jika selesai (done), tambahkan ke bawah
       } else {
-        wishes.insert(0, wish); // Tambahkan ke atas
+        wishes.insert(0, wish); // Jika belum selesai (undone), tambahkan ke atas
       }
+    }
+  });
+}
+
+
+  void deleteWish(String id) {
+    setState(() {
+      wishes.removeWhere((wish) => wish.id == id);
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.blue[900],
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0), // Menambahkan space di kiri dan kanan
+        padding: const EdgeInsets.symmetric(horizontal: 12.0),
         child: Column(
           children: [
             // Search and Filter Row
@@ -97,9 +115,8 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
                 children: [
-                  // Search Bar
                   Expanded(
-                    flex: 2, // Mengatur ukuran relatif search bar
+                    flex: 2,
                     child: TextField(
                       onChanged: (query) {
                         setState(() {
@@ -110,25 +127,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         hintText: 'Search by title...',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey),
                         ),
                         filled: true,
                         fillColor: Colors.white,
                         prefixIcon: Icon(Icons.search),
-                        hintStyle: TextStyle(fontFamily: 'Poppins'),
                       ),
                     ),
                   ),
                   SizedBox(width: 8),
-                  // Filter Dropdown
                   Expanded(
-                    flex: 1, // Mengatur ukuran relatif filter dropdown
+                    flex: 1,
                     child: DropdownButtonFormField<String>(
                       value: _filter,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey),
                         ),
                         filled: true,
                         fillColor: Colors.white,
@@ -149,7 +162,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-            // Wish List
             Expanded(
               child: ListView.builder(
                 itemCount: getFilteredWishes().length,
@@ -168,8 +180,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           MaterialPageRoute(
                             builder: (context) => DetailScreen(
                               wish: wish,
-                              toggleDone: () => toggleDone(index),
-                              onDelete: () => setState(() => wishes.removeAt(index)),
+                              toggleDone: () => toggleDone(wish.id),
+                              onDelete: () => deleteWish(wish.id),
                             ),
                           ),
                         );
@@ -257,7 +269,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
+        currentIndex: _currentIndex,
         selectedItemColor: Colors.blue[900],
         items: const [
           BottomNavigationBarItem(

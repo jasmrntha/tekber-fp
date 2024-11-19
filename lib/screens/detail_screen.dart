@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:final_project_2/models/wish_item.dart';
 import 'package:intl/intl.dart';
+import 'package:final_project_2/models/wish_item.dart';
 
 class DetailScreen extends StatefulWidget {
   final WishItem wish;
   final VoidCallback toggleDone;
-  final VoidCallback onDelete; // Callback untuk menghapus wishlist
+  final VoidCallback onDelete;
 
   DetailScreen({
     required this.wish,
@@ -42,14 +42,13 @@ class _DetailScreenState extends State<DetailScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              widget.toggleDone();
-              Navigator.pop(context);
-              
+              widget.toggleDone(); // Toggle status wishlist
+              Navigator.pop(context);// Perbarui tampilan DetailScreen
             },
             child: Padding(
               padding: EdgeInsets.only(right: 16),
               child: Text(
-                widget.wish.isDone ? 'Undone' : 'Done',  // Tampilkan status yang baru
+                widget.wish.isDone ? 'Undone' : 'Done',
                 style: TextStyle(
                   color: Colors.yellow,
                   fontFamily: 'Poppins',
@@ -57,8 +56,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 ),
               ),
             ),
-          )
-
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -115,11 +113,11 @@ class _DetailScreenState extends State<DetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildDetailRow('Note \t \t \t \t ', widget.wish.note),
+                  _buildDetailRow('Note', widget.wish.note),
                   SizedBox(height: 8),
-                  _buildDetailRow('Price \t \t \t \t ', 'Rp. $formattedPrice'),
+                  _buildDetailRow('Price', 'Rp. $formattedPrice'),
                   SizedBox(height: 8),
-                  _buildDetailRow('Link \t \t \t \t \t ', widget.wish.link),
+                  _buildDetailRow('Link', widget.wish.link),
                   SizedBox(height: 8),
                   _buildDetailRow('Category', widget.wish.category),
                 ],
@@ -158,21 +156,21 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  // Widget untuk baris detail
   Widget _buildDetailRow(String label, String value) {
     return Row(
       children: [
         Text(
-          '$label\t',
+          '$label:',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             fontFamily: 'Poppins',
           ),
         ),
+        SizedBox(width: 8),
         Expanded(
           child: Text(
-            ': $value',
+            value,
             style: TextStyle(fontSize: 16, fontFamily: 'Poppins'),
           ),
         ),
@@ -180,7 +178,6 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  // Menampilkan dialog konfirmasi penghapusan
   void _showDeleteConfirmation(BuildContext context) {
     showDialog(
       context: context,
@@ -191,7 +188,7 @@ class _DetailScreenState extends State<DetailScreen> {
             style: TextStyle(fontFamily: 'Poppins'),
           ),
           content: Text(
-            'Are you sure to delete this wishlist?',
+            'Are you sure you want to delete this wishlist?',
             style: TextStyle(fontFamily: 'Poppins'),
           ),
           actions: [
@@ -211,7 +208,7 @@ class _DetailScreenState extends State<DetailScreen> {
               onPressed: () {
                 widget.onDelete(); // Panggil fungsi hapus
                 Navigator.of(context).pop(); // Tutup dialog
-                Navigator.of(context).pop(); // Kembali ke homescreen
+                Navigator.of(context).pop(); // Kembali ke HomeScreen
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
