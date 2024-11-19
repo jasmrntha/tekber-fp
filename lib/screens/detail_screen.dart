@@ -43,12 +43,13 @@ class _DetailScreenState extends State<DetailScreen> {
           TextButton(
             onPressed: () {
               widget.toggleDone();
-              setState(() {});
+              Navigator.pop(context);
+              
             },
             child: Padding(
               padding: EdgeInsets.only(right: 16),
               child: Text(
-                widget.wish.isDone ? 'Undone' : 'Done',
+                widget.wish.isDone ? 'Undone' : 'Done',  // Tampilkan status yang baru
                 style: TextStyle(
                   color: Colors.yellow,
                   fontFamily: 'Poppins',
@@ -56,7 +57,8 @@ class _DetailScreenState extends State<DetailScreen> {
                 ),
               ),
             ),
-          ),
+          )
+
         ],
       ),
       body: SingleChildScrollView(
