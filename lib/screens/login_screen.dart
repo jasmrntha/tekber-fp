@@ -30,6 +30,7 @@ class LoginScreen extends StatelessWidget {
                             fontWeight: FontWeight.w800,
                             fontSize: 20,
                             color: Colors.white,
+                            fontFamily: 'Poppins',
                           ),
                         ),
                         TextSpan(text: '\n\n'),
@@ -37,6 +38,7 @@ class LoginScreen extends StatelessWidget {
                           text: 'user wishlist maker application',
                           style: TextStyle(
                             color: Colors.white,
+                            fontFamily: 'Poppins',
                           ),
                           ),
                       ],),),],
@@ -50,17 +52,19 @@ class LoginScreen extends StatelessWidget {
 
               Expanded(
                 child: RichText(
-                    text: TextSpan(children: [
+                    text: const TextSpan(children: [
                   TextSpan(
                     text: "Don't have an account?",
                     style: TextStyle(
-                      color: Colors.white
+                      color: Colors.white,
+                      fontFamily: 'Poppins',
                     ),
                     ),
                   TextSpan(
                     text: " Sign up",
                     style: TextStyle(
                       color: Color.fromARGB(255, 199, 176, 81),
+                      fontFamily: 'Poppins',
                     ),
                     ),
                 ])),
@@ -103,7 +107,7 @@ class _inputFormState extends State<inputForm> {
               decoration: InputDecoration(
                 labelText: 'Email',
                 border: InputBorder.none,
-                labelStyle: TextStyle(color: Colors.white)
+                labelStyle: TextStyle(color: Colors.white, fontFamily: 'Poppins',)
               ),
             ),
           ),
@@ -123,7 +127,7 @@ class _inputFormState extends State<inputForm> {
               decoration: InputDecoration(
                 labelText: 'Password',
                 border: InputBorder.none,
-                labelStyle: TextStyle(color: Colors.white)
+                labelStyle: TextStyle(color: Colors.white, fontFamily: 'Poppins',)
               ),
             ),
           ),
@@ -147,7 +151,7 @@ class _inputFormState extends State<inputForm> {
           ),
           child: Text(
             'Login',
-            style: TextStyle(color: Colors.white, fontSize: 18),
+            style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Poppins',),
           ),
         ),
       ],

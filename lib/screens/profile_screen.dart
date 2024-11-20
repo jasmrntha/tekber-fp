@@ -5,14 +5,6 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Profile',
-          style: TextStyle(color: Colors.yellow, fontFamily: 'Poppins'),
-        ),
-        backgroundColor: Colors.blue[900],
-        automaticallyImplyLeading: false,
-      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -37,14 +29,14 @@ class ProfileScreen extends StatelessWidget {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: const Text('Confirmation of Logout'),
-                      content: const Text('Sure you want to logout?'),
+                      title: const Text('Confirmation of Logout', style: TextStyle(fontFamily: 'Poppins')),
+                      content: const Text('Sure you want to logout?', style: TextStyle(fontFamily: 'Poppins')),
                       actions: <Widget>[
                         TextButton(
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
-                          child: const Text('Not sure'),
+                          child: const Text('Not sure', style: TextStyle(fontFamily: 'Poppins')),
                         ),
                         TextButton(
                           onPressed: () {
@@ -53,7 +45,7 @@ class ProfileScreen extends StatelessWidget {
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
-                                  title: const Text('Logout Successful'),
+                                  title: const Text('Logout Successful', style: TextStyle(fontFamily: 'Poppins')),
                                   actions: <Widget>[
                                     TextButton(
                                       onPressed: () {
@@ -64,14 +56,14 @@ class ProfileScreen extends StatelessWidget {
                                         );
                                       },
                                       child: Center(
-                                        child: Text('OK', textAlign: TextAlign.center))
+                                        child: const Text('OK', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Poppins')))
                                     ),
                                   ],
                                 );
                               },
                             );
                           },
-                          child: const Text("I'm sure"),
+                          child: const Text("I'm sure", style: TextStyle(fontFamily: 'Poppins')),
                         ),
                       ],
                     );
