@@ -36,7 +36,7 @@ class ProfileScreen extends StatelessWidget {
                 // Implement logout logic here
               },
               style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(255, 169, 199, 243)),
-              child: const Text('Logout', ),
+              child: const Text('LOGOUT',style: TextStyle(fontFamily: 'Poppins', color: Colors.black), ),
             ),
           ],
         ),
