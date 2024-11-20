@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:final_project_2/screens/home_screen.dart';
 import 'package:final_project_2/screens/profile_screen.dart';
-import 'package:final_project_2/models/wish_model.dart'; // Import model yang Anda buat
+import 'package:final_project_2/models/wish_model.dart'; 
 
 void main() {
   runApp(
