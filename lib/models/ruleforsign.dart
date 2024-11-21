@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:final_project_2/screens/signuppage.dart';
+import 'package:final_project_2/screens/signup_screen.dart';
 
 class RuleForSignPage extends StatelessWidget {
   @override
