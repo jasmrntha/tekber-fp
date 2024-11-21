@@ -1,3 +1,4 @@
+import 'package:final_project_2/screens/add_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_2/screens/detail_screen.dart';
 import 'package:final_project_2/models/wish_item.dart';
@@ -105,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _currentIndex == 0
               ? 'Your Wish' // Judul untuk tab Home
               : _currentIndex == 1
-                  ? 'Add' // Judul untuk tab Add (jika ada)
+                  ? 'Add Wish' // Judul untuk tab Add (jika ada)
                   : 'Profile', // Judul untuk tab Profile
           style: TextStyle(color: Colors.yellow, fontFamily: 'Poppins'),
         ),
@@ -287,7 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           // Halaman Add
-          Placeholder(),
+          AddItem(),
           // Halaman Profile
           ProfileScreen(),
         ],

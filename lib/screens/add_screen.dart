@@ -77,15 +77,6 @@ class _AddItemState extends State<AddItem> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Wish',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              color: Colors.yellow,
-            )),
-        backgroundColor: Colors.blue[900],
-        elevation: 0,
-      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
