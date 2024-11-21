@@ -15,10 +15,11 @@ class EditItem extends StatefulWidget {
 
 class _EditItemState extends State<EditItem> {
   // Initialize fields with current wish item values
-  String title = '';
-  String note = '';
-  String link = '';
-  double price = 0;
+  late TextEditingController titleController;
+  late TextEditingController noteController;
+  late TextEditingController linkController;
+  late TextEditingController priceController;
+  
   String selectedCategory = '';
   List<String> _selectedImages = []; // Store images as base64 strings
 
@@ -33,11 +34,13 @@ class _EditItemState extends State<EditItem> {
   @override
   void initState() {
     super.initState();
-    // Initialize fields with current wish item's values
-    title = widget.wishItem.title;
-    note = widget.wishItem.note;
-    link = widget.wishItem.link;
-    price = widget.wishItem.price;
+    
+    // Initialize controllers with current wish item's values
+    titleController = TextEditingController(text: widget.wishItem.title);
+    noteController = TextEditingController(text: widget.wishItem.note);
+    linkController = TextEditingController(text: widget.wishItem.link);
+    priceController = TextEditingController(text: widget.wishItem.price.toString());
+
     selectedCategory = widget.wishItem.category;
     _selectedImages = widget.wishItem.image; // Assume images are already base64 strings
   }
@@ -67,6 +70,16 @@ class _EditItemState extends State<EditItem> {
   }
 
   @override
+  void dispose() {
+    // Dispose controllers when the widget is disposed
+    titleController.dispose();
+    noteController.dispose();
+    linkController.dispose();
+    priceController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -88,10 +101,10 @@ class _EditItemState extends State<EditItem> {
             children: [
               // Title Input
               TextField(
-                controller: TextEditingController(text: title),
+                controller: titleController,
                 onChanged: (value) {
                   setState(() {
-                    title = value;
+                    // This is now updated directly with the controller
                   });
                 },
                 decoration: const InputDecoration(labelText: "Item Name"),
@@ -99,10 +112,10 @@ class _EditItemState extends State<EditItem> {
               const SizedBox(height: 16),
               // Note Input
               TextField(
-                controller: TextEditingController(text: note),
+                controller: noteController,
                 onChanged: (value) {
                   setState(() {
-                    note = value;
+                    // This is now updated directly with the controller
                   });
                 },
                 decoration: const InputDecoration(labelText: "Note"),
@@ -110,11 +123,11 @@ class _EditItemState extends State<EditItem> {
               const SizedBox(height: 16),
               // Price Input
               TextField(
-                controller: TextEditingController(text: price.toString()),
+                controller: priceController,
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
                   setState(() {
-                    price = double.tryParse(value) ?? 0;
+                    // This is now updated directly with the controller
                   });
                 },
                 decoration: const InputDecoration(labelText: "Price"),
@@ -122,10 +135,10 @@ class _EditItemState extends State<EditItem> {
               const SizedBox(height: 16),
               // Link Input
               TextField(
-                controller: TextEditingController(text: link),
+                controller: linkController,
                 onChanged: (value) {
                   setState(() {
-                    link = value;
+                    // This is now updated directly with the controller
                   });
                 },
                 decoration: const InputDecoration(labelText: "Link"),
@@ -210,11 +223,11 @@ class _EditItemState extends State<EditItem> {
                 onPressed: () {
                   // Create a new updated WishItem
                   WishItem updatedItem = WishItem(
-                    title: title,
-                    note: note,
+                    title: titleController.text,
+                    note: noteController.text,
                     image: _selectedImages, // Store base64 images directly
-                    price: price,
-                    link: link,
+                    price: double.tryParse(priceController.text) ?? 0,
+                    link: linkController.text,
                     category: selectedCategory,
                     isDone: widget.wishItem.isDone, // Maintain isDone state
                   );
