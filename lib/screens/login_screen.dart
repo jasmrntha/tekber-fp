@@ -54,7 +54,6 @@ class LoginScreen extends StatelessWidget {
               Expanded(
                 child: GestureDetector(
                   onTap: () {
-                    // Navigate to SignUpPage when "Sign up" is tapped
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => SignUpPage()),
