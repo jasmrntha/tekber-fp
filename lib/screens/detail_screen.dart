@@ -1,9 +1,11 @@
+import 'package:final_project_2/screens/edit_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:final_project_2/models/wish_item.dart';
+import 'package:final_project_2/screens/home_screen.dart'; // Assuming you have a HomeScreen
 
 class DetailScreen extends StatefulWidget {
-  final WishItem wish;
+  WishItem wish;
   final VoidCallback toggleDone;
   final VoidCallback onDelete;
 
@@ -40,10 +42,22 @@ class _DetailScreenState extends State<DetailScreen> {
         backgroundColor: Colors.blue[900],
         iconTheme: IconThemeData(color: Colors.yellow),
         actions: [
+          // Home Button
+          IconButton(
+            icon: Icon(Icons.home, color: Colors.yellow),
+            onPressed: () {
+              // Navigate to HomeScreen and remove all previous routes
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen()),
+                (Route<dynamic> route) => false,
+              );
+            },
+          ),
           TextButton(
             onPressed: () {
               widget.toggleDone(); // Toggle status wishlist
-              Navigator.pop(context);// Perbarui tampilan DetailScreen
+              Navigator.pop(context); // Perbarui tampilan DetailScreen
             },
             child: Padding(
               padding: EdgeInsets.only(right: 16),
@@ -84,7 +98,8 @@ class _DetailScreenState extends State<DetailScreen> {
                   });
                 },
                 itemBuilder: (context, index) {
-                  return Image.asset(
+                  // Use Image.network for web-based base64 images
+                  return Image.network(
                     widget.wish.image[index],
                     width: 200,
                     height: 200,
@@ -127,13 +142,26 @@ class _DetailScreenState extends State<DetailScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 169, 199, 243),
-                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditItem(
+                          wishItem: widget.wish, // Pass the current wish item
+                          onSave: (updatedWishItem) {
+                            setState(() {
+                              widget.wish =
+                                  updatedWishItem; // Update the wish with new data
+                            });
+                          },
+                        ),
+                      ),
+                    );
+                  },
                   child: Text(
                     'EDIT',
-                    style: TextStyle(fontFamily: 'Poppins', color: Colors.black),
+                    style:
+                        TextStyle(fontFamily: 'Poppins', color: Colors.black),
                   ),
                 ),
                 SizedBox(width: 16),
@@ -144,7 +172,8 @@ class _DetailScreenState extends State<DetailScreen> {
                   ),
                   child: Text(
                     'DELETE',
-                    style: TextStyle(fontFamily: 'Poppins', color: Colors.black),
+                    style:
+                        TextStyle(fontFamily: 'Poppins', color: Colors.black),
                   ),
                 ),
               ],

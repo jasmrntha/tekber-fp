@@ -1,3 +1,4 @@
+import 'package:final_project_2/screens/add_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:final_project_2/screens/home_screen.dart';
@@ -33,7 +34,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = [
     HomeScreen(),
-    Placeholder(), // Ganti dengan AddScreen jika ada
+    AddItem(), // Ganti dengan AddScreen jika ada
     ProfileScreen(),
   ];
 

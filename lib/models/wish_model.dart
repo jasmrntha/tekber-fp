@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
+import 'wish_item.dart';
 
-class WishModel with ChangeNotifier {
-  List<String> _wishes = []; // Daftar wish Anda
+class WishModel extends ChangeNotifier {
+  final List<WishItem> _wishes = [];
 
-  List<String> get wishes => _wishes;
+  List<WishItem> get wishes => List.unmodifiable(_wishes);
 
-  void addWish(String wish) {
+  void addWish(WishItem wish) {
     _wishes.add(wish);
-    notifyListeners(); // Memberitahu UI untuk memperbarui
+    notifyListeners();
   }
 
-  void removeWish(String wish) {
-    _wishes.remove(wish);
-    notifyListeners(); // Memberitahu UI untuk memperbarui
+  void updateWish(WishItem updatedWish) {
+    final index = _wishes.indexWhere((wish) => wish.id == updatedWish.id);
+    if (index != -1) {
+      _wishes[index] = updatedWish;
+      notifyListeners();
+    }
+  }
+
+  void deleteWish(String id) {
+    _wishes.removeWhere((wish) => wish.id == id);
+    notifyListeners();
   }
 }
