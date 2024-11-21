@@ -4,7 +4,7 @@ class WishItem {
   final String id;
   final String title;
   final String note;
-  final int price;
+  final double price;
   final List<String> image;
   final String link;
   final String category;
@@ -20,4 +20,5 @@ class WishItem {
     required this.category,
     this.isDone = false,
   }) : id = id ?? const Uuid().v4(); // Buat ID unik jika tidak disediakan
+  
 }
