@@ -1,4 +1,6 @@
 import 'package:final_project_2/screens/add_screen.dart';
+import 'package:final_project_2/screens/home_screen.dart';
+import 'package:final_project_2/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:final_project_2/models/wish_model.dart';
