@@ -1,18 +1,10 @@
+import 'package:final_project_2/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Profile',
-          style: TextStyle(color: Colors.yellow, fontFamily: 'Poppins'),
-        ),
-        backgroundColor: Colors.blue[900],
-        automaticallyImplyLeading: false,
-      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -21,7 +13,7 @@ class ProfileScreen extends StatelessWidget {
               radius: 50.0, // Warna latar belakang lingkaran
               child: Icon(
                 Icons.person, // Ikon people
-                size: 50.0,   // Ukuran ikon
+                size: 50.0, // Ukuran ikon
                 color: Colors.white, // Warna ikon
               ),
             ),
@@ -33,10 +25,58 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                // Implement logout logic here
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Confirmation of Logout', style: TextStyle(fontFamily: 'Poppins')),
+                      content: const Text('Sure you want to logout?', style: TextStyle(fontFamily: 'Poppins')),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text('Not sure', style: TextStyle(fontFamily: 'Poppins')),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Logout Successful', style: TextStyle(fontFamily: 'Poppins')),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => LoginScreen()),
+                                        );
+                                      },
+                                      child: Center(
+                                        child: const Text('OK', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Poppins')))
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          child: const Text("I'm sure", style: TextStyle(fontFamily: 'Poppins')),
+                        ),
+                      ],
+                    );
+                  },
+                );
               },
-              style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(255, 169, 199, 243)),
-              child: const Text('LOGOUT',style: TextStyle(fontFamily: 'Poppins', color: Colors.black), ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 169, 199, 243),
+              ),
+              child: const Text(
+                'LOGOUT',
+                style: TextStyle(fontFamily: 'Poppins', color: Colors.black),
+              ),
             ),
           ],
         ),
