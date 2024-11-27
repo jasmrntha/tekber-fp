@@ -91,6 +91,7 @@ class _EditItemState extends State<EditItem> {
           ),
         ),
         backgroundColor: Colors.blue[900],
+        iconTheme: IconThemeData(color: Colors.yellow),
         elevation: 0,
       ),
       body: Padding(

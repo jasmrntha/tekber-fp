@@ -1,4 +1,5 @@
 import 'package:final_project_2/screens/login_screen.dart';
+import 'package:final_project_2/screens/change_password_screen.dart'; 
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -10,11 +11,11 @@ class ProfileScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const CircleAvatar(
-              radius: 50.0, // Warna latar belakang lingkaran
+              radius: 50.0, 
               child: Icon(
-                Icons.person, // Ikon people
-                size: 50.0, // Ukuran ikon
-                color: Colors.white, // Warna ikon
+                Icons.person, 
+                size: 50.0, 
+                color: Colors.white,
               ),
             ),
             const SizedBox(height: 16),
@@ -22,9 +23,28 @@ class ProfileScreen extends StatelessWidget {
               'user@gmail.com',
               style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
             ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: () {
+                // Navigasi ke halaman ChangePasswordScreen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ChangePasswordScreen()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 169, 199, 243),
+                minimumSize: const Size(200, 50), // Ukuran tombol
+              ),
+              child: const Text(
+                'CHANGE PASSWORD',
+                style: TextStyle(fontFamily: 'Poppins', color: Colors.black),
+              ),
+            ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
+                // Fungsi untuk logout
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
@@ -55,8 +75,13 @@ class ProfileScreen extends StatelessWidget {
                                           MaterialPageRoute(builder: (context) => LoginScreen()),
                                         );
                                       },
-                                      child: Center(
-                                        child: const Text('OK', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Poppins')))
+                                      child: const Center(
+                                        child: Text(
+                                          'OK',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(fontFamily: 'Poppins'),
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 );
@@ -71,11 +96,12 @@ class ProfileScreen extends StatelessWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 169, 199, 243),
+                backgroundColor:  Colors.red,
+                minimumSize: const Size(200, 50), // Ukuran tombol
               ),
               child: const Text(
                 'LOGOUT',
-                style: TextStyle(fontFamily: 'Poppins', color: Colors.black),
+                style: TextStyle(fontFamily: 'Poppins', color: Colors.white),
               ),
             ),
           ],

@@ -42,22 +42,10 @@ class _DetailScreenState extends State<DetailScreen> {
         backgroundColor: Colors.blue[900],
         iconTheme: IconThemeData(color: Colors.yellow),
         actions: [
-          // Home Button
-          IconButton(
-            icon: Icon(Icons.home, color: Colors.yellow),
-            onPressed: () {
-              // Navigate to HomeScreen and remove all previous routes
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => HomeScreen()),
-                (Route<dynamic> route) => false,
-              );
-            },
-          ),
           TextButton(
             onPressed: () {
-              widget.toggleDone(); // Toggle status wishlist
-              Navigator.pop(context); // Perbarui tampilan DetailScreen
+              widget.toggleDone(); 
+              Navigator.pop(context); 
             },
             child: Padding(
               padding: EdgeInsets.only(right: 16),
@@ -98,7 +86,6 @@ class _DetailScreenState extends State<DetailScreen> {
                   });
                 },
                 itemBuilder: (context, index) {
-                  // Use Image.network for web-based base64 images
                   return Image.network(
                     widget.wish.image[index],
                     width: 200,
@@ -168,12 +155,12 @@ class _DetailScreenState extends State<DetailScreen> {
                 ElevatedButton(
                   onPressed: () => _showDeleteConfirmation(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 169, 199, 243),
+                    backgroundColor:  Colors.red,
                   ),
                   child: Text(
                     'DELETE',
                     style:
-                        TextStyle(fontFamily: 'Poppins', color: Colors.black),
+                        TextStyle(fontFamily: 'Poppins', color: Colors.white),
                   ),
                 ),
               ],
