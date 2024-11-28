@@ -1,4 +1,5 @@
 import 'package:final_project_2/screens/add_screen.dart';
+import 'package:final_project_2/screens/guide_screen.dart';
 import 'package:final_project_2/screens/home_screen.dart';
 import 'package:final_project_2/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +48,7 @@ class _MainScreenState extends State<MainScreen> {
         children: _screens,
       ),
       bottomNavigationBar: BottomNavigationBar(
+        key: GlobalKey(),
         currentIndex: _currentIndex,
         selectedItemColor: Colors.blue[900],
         items: const [

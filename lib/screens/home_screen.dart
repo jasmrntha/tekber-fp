@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:final_project_2/screens/detail_screen.dart';
 import 'package:final_project_2/models/wish_item.dart';
 import 'package:final_project_2/screens/profile_screen.dart';
+import 'package:final_project_2/screens/guide_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -89,11 +91,40 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   int _currentIndex = 0;
-  final PageController _pageController = PageController(); // Tambahkan PageController
+  final PageController _pageController =
+      PageController(); // Tambahkan PageControlle
+
+  final GlobalKey _bottomnavbarkeys = GlobalKey();
+  final List<GlobalKey> _navbarkeys = [GlobalKey(), GlobalKey(), GlobalKey()];
+  void initState() {
+    super.initState();
+    _firstLoginCheck(context);
+  }
+
+  Future<void> _firstLoginCheck(BuildContext context) async {
+    SharedPreferences userPref = await SharedPreferences.getInstance();
+    bool firstLogin = userPref.getBool('firstLogin') ?? true;
+
+    if (firstLogin) {
+      await userPref.setBool('firstLogin', false);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            debugPrint('Keys: ${_navbarkeys.map((key) => key.currentContext)}');
+            return FirstGuide(bottomnavbarkeys: _navbarkeys);
+          },
+        ),
+      );
+    });
+    }
+  }
 
   @override
   void dispose() {
-    _pageController.dispose(); // Jangan lupa dispose untuk mencegah memory leaks
+    _pageController
+        .dispose(); // Jangan lupa dispose untuk mencegah memory leaks
     super.dispose();
   }
 
@@ -260,7 +291,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               Align(
                                 alignment: Alignment.centerRight,
                                 child: Container(
-                                  padding: EdgeInsets.symmetric(
+                                  padding: const EdgeInsets.symmetric(
                                       horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
                                     color: Colors.grey[200],
@@ -294,26 +325,40 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
+        key: _bottomnavbarkeys,
         currentIndex: _currentIndex,
         selectedItemColor: Colors.blue[900],
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Builder(
+                key: _navbarkeys[0],
+                builder: (context) {
+                  return Icon(Icons.home);
+                }),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add),
+            icon: Builder(
+                key: _navbarkeys[1],
+                builder: (context) {
+                  return Icon(Icons.add);
+                }),
             label: 'Add',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: Builder(
+                key: _navbarkeys[2],
+                builder: (context) {
+                  return Icon(Icons.person);
+                }),
             label: 'Profile',
           ),
         ],
         onTap: (index) {
           setState(() {
             _currentIndex = index; // Ubah indeks navigasi
-            _pageController.jumpToPage(index); // Pindahkan PageView ke halaman yang sesuai
+            _pageController
+                .jumpToPage(index); // Pindahkan PageView ke halaman yang sesuai
           });
         },
       ),
