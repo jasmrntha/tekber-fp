@@ -1,7 +1,8 @@
-import 'package:final_project_2/screens/signup_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:final_project_2/screens/signup_screen.dart';
 import 'package:final_project_2/screens/home_screen.dart';
 import 'package:final_project_2/screens/guide_screen.dart';
+import 'package:final_project_2/screens/forgot_password_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   @override
@@ -49,7 +50,7 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: inputForm(),
+                child: InputForm(),
                 flex: 5,
               ),
               Expanded(
@@ -89,12 +90,12 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
-class inputForm extends StatefulWidget {
+class InputForm extends StatefulWidget {
   @override
-  _inputFormState createState() => _inputFormState();
+  _InputFormState createState() => _InputFormState();
 }
 
-class _inputFormState extends State<inputForm> {
+class _InputFormState extends State<InputForm> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
@@ -140,6 +141,24 @@ class _inputFormState extends State<inputForm> {
                 border: InputBorder.none,
                 labelStyle: TextStyle(color: Colors.white, fontFamily: 'Poppins'),
               ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        TextButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const ForgotPasswordScreen()),
+            );
+          },
+          child: const Text(
+            "Forgot password?",
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'Poppins',
+              decoration: TextDecoration.underline,
             ),
           ),
         ),
