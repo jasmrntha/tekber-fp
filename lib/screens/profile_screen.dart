@@ -18,15 +18,9 @@ class ProfileScreen extends StatelessWidget {
                 color: Colors.white,
               ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'user@gmail.com',
-              style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
-            ),
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: () {
-                // Navigasi ke halaman ChangePasswordScreen
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ChangePasswordScreen()),
@@ -44,7 +38,6 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                // Fungsi untuk logout
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
@@ -97,7 +90,7 @@ class ProfileScreen extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor:  Colors.red,
-                minimumSize: const Size(200, 50), // Ukuran tombol
+                minimumSize: const Size(200, 50), 
               ),
               child: const Text(
                 'LOGOUT',

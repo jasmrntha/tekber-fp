@@ -2,7 +2,7 @@ import 'package:final_project_2/screens/edit_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:final_project_2/models/wish_item.dart';
-import 'package:final_project_2/screens/home_screen.dart'; // Assuming you have a HomeScreen
+import 'package:final_project_2/screens/home_screen.dart';
 
 class DetailScreen extends StatefulWidget {
   WishItem wish;
