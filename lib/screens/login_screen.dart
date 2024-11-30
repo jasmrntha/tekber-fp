@@ -1,16 +1,18 @@
 import 'package:final_project_2/screens/signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_2/screens/home_screen.dart';
-import 'package:final_project_2/screens/guide_screen.dart';
+import 'package:final_project_2/screens/forgot_password_screen.dart';
 
 class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     double screenheight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       body: Container(
-        color: Color(0xFF0D47A1),
+        color: const Color(0xFF0D47A1),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -21,10 +23,10 @@ class LoginScreen extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.star, size: 60, color: Colors.white),           
+                      const Icon(Icons.star, size: 60, color: Colors.white),
                       RichText(
                         textAlign: TextAlign.center,
-                        text: TextSpan(children: [
+                        text: const TextSpan(children: [
                           TextSpan(
                             text: 'Hello, Welcome To Make A Wish',
                             style: TextStyle(
@@ -48,16 +50,18 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              Expanded(
-                child: inputForm(),
+              const Expanded(
                 flex: 5,
+                child: inputForm(),
               ),
               Expanded(
+                flex: 1,
                 child: GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SignUpPage()),
+                      MaterialPageRoute(
+                          builder: (context) => const SignUpPage()),
                     );
                   },
                   child: RichText(
@@ -79,7 +83,6 @@ class LoginScreen extends StatelessWidget {
                     ]),
                   ),
                 ),
-                flex: 1,
               ),
             ],
           ),
@@ -90,6 +93,8 @@ class LoginScreen extends StatelessWidget {
 }
 
 class inputForm extends StatefulWidget {
+  const inputForm({super.key});
+
   @override
   _inputFormState createState() => _inputFormState();
 }
@@ -106,8 +111,8 @@ class _inputFormState extends State<inputForm> {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: Color(0xFF80A4FF),
-            border: Border.all(color: Color(0xFF80A4FF)),
+            color: const Color(0xFF80A4FF),
+            border: Border.all(color: const Color(0xFF80A4FF)),
             borderRadius: BorderRadius.circular(10),
           ),
           width: screenwidth * 0.8,
@@ -115,19 +120,20 @@ class _inputFormState extends State<inputForm> {
             padding: const EdgeInsets.only(left: 10),
             child: TextFormField(
               controller: emailController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Email',
                 border: InputBorder.none,
-                labelStyle: TextStyle(color: Colors.white, fontFamily: 'Poppins'),
+                labelStyle:
+                    TextStyle(color: Colors.white, fontFamily: 'Poppins'),
               ),
             ),
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
-            color: Color(0xFF80A4FF),
-            border: Border.all(color: Color(0xFF80A4FF)),
+            color: const Color(0xFF80A4FF),
+            border: Border.all(color: const Color(0xFF80A4FF)),
             borderRadius: BorderRadius.circular(10),
           ),
           width: screenwidth * 0.8,
@@ -135,34 +141,54 @@ class _inputFormState extends State<inputForm> {
             padding: const EdgeInsets.only(left: 10),
             child: TextFormField(
               controller: passwordController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Password',
                 border: InputBorder.none,
-                labelStyle: TextStyle(color: Colors.white, fontFamily: 'Poppins'),
+                labelStyle:
+                    TextStyle(color: Colors.white, fontFamily: 'Poppins'),
               ),
             ),
           ),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         ElevatedButton(
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => HomeScreen()),
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
             );
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: Color.fromARGB(255, 199, 176, 81),
+            backgroundColor: const Color.fromARGB(255, 199, 176, 81),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
-              side: BorderSide(
+              side: const BorderSide(
                 color: Color.fromARGB(255, 199, 176, 81),
               ),
             ),
           ),
-          child: Text(
+          child: const Text(
             'Login',
-            style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Poppins'),
+            style: TextStyle(
+                color: Colors.white, fontSize: 18, fontFamily: 'Poppins'),
+          ),
+        ),
+        const SizedBox(height: 10),
+        TextButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const ForgotPasswordScreen()),
+            );
+          },
+          child: const Text(
+            "Forgot password?",
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'Poppins',
+              decoration: TextDecoration.underline,
+            ),
           ),
         ),
       ],
