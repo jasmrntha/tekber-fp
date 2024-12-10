@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "48801867552",
+    "project_id": "tekberd4makeawish",
+    "storage_bucket": "tekberd4makeawish.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:48801867552:android:dbf6e9f8f06fe39aff1945",
+        "android_client_info": {
+          "package_name": "com.example.final_project_2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiD0e3XsgQ9LZwDu-pTpzFgUYrwTA9lDk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
