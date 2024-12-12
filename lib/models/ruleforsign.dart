@@ -10,7 +10,7 @@ class RuleForSignPage extends StatelessWidget {
         backgroundColor: Colors.blue[900],
         appBar: AppBar(
           // Header dengan text "Your Wish" berwarna biru muda dan ditengahkan
-          title: Text('Your Wish',
+          title: const Text('Your Wish',
               style: TextStyle(color: const Color.fromARGB(255, 245, 233, 66))),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -37,7 +37,7 @@ class RuleForSignPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       // Judul "Rules for sign up" di dalam container
-                      Text(
+                      const Text(
                         'Rules for sign up',
                         style: TextStyle(
                           fontSize: 18,
@@ -49,23 +49,23 @@ class RuleForSignPage extends StatelessWidget {
                       // Aturan 1-10 untuk sign up dengan padding
                       Expanded(
                         child: ListView(
-                          children: [
+                          children: const [
                             Padding(
-                              padding: const EdgeInsets.all(10.0),
+                              padding: EdgeInsets.all(10.0),
                               child: Text(
                                 '1. Pastikan Anda telah membaca dan memahami syarat dan ketentuan.',
                                 style: TextStyle(fontSize: 14),
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(10.0),
+                              padding: EdgeInsets.all(10.0),
                               child: Text(
                                 '2. Gunakan alamat email yang valid.',
                                 style: TextStyle(fontSize: 14),
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(10.0),
+                              padding: EdgeInsets.all(10.0),
                               child: Text(
                                 '3. Password harus memiliki minimal 8 karakter.',
                                 style: TextStyle(fontSize: 14),

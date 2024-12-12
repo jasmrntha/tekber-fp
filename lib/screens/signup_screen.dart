@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:final_project_2/services/fireStoreService.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_2/screens/login_screen.dart';
 import 'package:final_project_2/screens/home_screen.dart';
@@ -8,9 +10,12 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  final Firestoreservice firestoreservice = Firestoreservice();
+
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -20,7 +25,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
   // Email validation
   String? validateEmail(String? value) {
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     if (value == null || value.isEmpty) {
       return 'Email is required';
     } else if (!emailRegex.hasMatch(value)) {
@@ -31,7 +37,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
   // Password validation
   String? validatePassword(String? value) {
-    final passwordRegex = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$');
+    final passwordRegex =
+        RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$');
     if (value == null || value.isEmpty) {
       return 'Password is required';
     } else if (!passwordRegex.hasMatch(value)) {
@@ -200,19 +207,27 @@ class _SignUpPageState extends State<SignUpPage> {
                       Center(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 220, 224, 228),
-                            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                            backgroundColor:
+                                const Color.fromARGB(255, 220, 224, 228),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 50, vertical: 15),
                           ),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
                               // All validations are passed, proceed to Home screen
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => HomeScreen()),
-                              );
+                              firestoreservice.addAccount(emailController.text,
+                                  passwordController.text);
+                              emailController.clear();
+                              passwordController.clear();
+                              confirmPasswordController.clear();
+                              firstNameController.clear();
+                              lastNameController.clear();
+                              Navigator.pop(context);
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Please fill in all fields correctly')),
+                                const SnackBar(
+                                    content: Text(
+                                        'Please fill in all fields correctly')),
                               );
                             }
                           },
@@ -230,7 +245,8 @@ class _SignUpPageState extends State<SignUpPage> {
                           onTap: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => LoginScreen()),
+                              MaterialPageRoute(
+                                  builder: (context) => LoginScreen()),
                             );
                           },
                           child: Text(
