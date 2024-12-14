@@ -1,57 +1,49 @@
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_project_2/models/wish_item.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class EditItem extends StatefulWidget {
   final WishItem wishItem; // Receive the current wish item
+  final String documentId; // Document ID of the item to update
   final Function(WishItem) onSave; // Callback for saving updated item
 
-  const EditItem({super.key, required this.wishItem, required this.onSave});
+  const EditItem({super.key, required this.wishItem, required this.onSave, required this.documentId});
 
   @override
   State<EditItem> createState() => _EditItemState();
 }
 
 class _EditItemState extends State<EditItem> {
-  // Initialize fields with current wish item values
   late TextEditingController titleController;
   late TextEditingController noteController;
   late TextEditingController linkController;
   late TextEditingController priceController;
-  
+
   String selectedCategory = '';
   List<String> _selectedImages = []; // Store images as base64 strings
 
-  // List of categories to choose from
-  final List<String> categories = [
-    'Household Item',
-    'Fashion',
-    'Sport',
-    'Books'
-  ];
+  final List<String> categories = ['Household Item', 'Fashion', 'Sport', 'Books'];
 
   @override
   void initState() {
     super.initState();
-    
-    // Initialize controllers with current wish item's values
+
     titleController = TextEditingController(text: widget.wishItem.title);
     noteController = TextEditingController(text: widget.wishItem.note);
     linkController = TextEditingController(text: widget.wishItem.link);
     priceController = TextEditingController(text: widget.wishItem.price.toString());
 
     selectedCategory = widget.wishItem.category;
-    _selectedImages = widget.wishItem.image; // Assume images are already base64 strings
+    _selectedImages = widget.wishItem.image;
   }
 
-  // Pick images and convert to base64
   Future<void> _pickImages() async {
     final pickedFiles = await ImagePicker().pickMultiImage();
     if (pickedFiles != null) {
       final List<String> base64Images = [];
       for (var pickedFile in pickedFiles) {
-        // Read bytes and convert to base64
         final bytes = await pickedFile.readAsBytes();
         final base64Image = 'data:image/jpeg;base64,${base64Encode(bytes)}';
         base64Images.add(base64Image);
@@ -62,7 +54,6 @@ class _EditItemState extends State<EditItem> {
     }
   }
 
-  // Remove an image from the selected list
   void _removeImage(int index) {
     setState(() {
       _selectedImages.removeAt(index);
@@ -71,12 +62,56 @@ class _EditItemState extends State<EditItem> {
 
   @override
   void dispose() {
-    // Dispose controllers when the widget is disposed
     titleController.dispose();
     noteController.dispose();
     linkController.dispose();
     priceController.dispose();
     super.dispose();
+  }
+
+  Future<void> _updateItemInFirestore() async {
+    try {
+      // Create a map to store the updated data
+      Map<String, dynamic> updatedItemData = {
+        'title': titleController.text,
+        'note': noteController.text,
+        'price': double.tryParse(priceController.text) ?? 0,
+        'link': linkController.text,
+        'category': selectedCategory,
+        'image': _selectedImages,
+        'isDone': widget.wishItem.isDone, // Retain the "isDone" state
+      };
+
+      // Update the document in Firestore using the document ID
+      await FirebaseFirestore.instance
+          .collection('wish_items') // Make sure you use the correct collection name
+          .doc(widget.documentId) // Update the document using its ID
+          .update(updatedItemData);
+
+      // Call the onSave callback after successful Firestore update
+      widget.onSave(WishItem(
+        title: titleController.text,
+        note: noteController.text,
+        image: _selectedImages,
+        price: double.tryParse(priceController.text) ?? 0,
+        link: linkController.text,
+        category: selectedCategory,
+        isDone: widget.wishItem.isDone, // Retain the "isDone" state
+      ));
+
+      // Show a success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Item updated successfully!')),
+      );
+
+      // Pop the Edit screen and return to the previous screen
+      Navigator.pop(context);
+    } catch (e) {
+      // Handle error during the update process
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error updating item: $e')),
+      );
+    }
   }
 
   @override
@@ -100,63 +135,32 @@ class _EditItemState extends State<EditItem> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title Input
               TextField(
                 controller: titleController,
-                onChanged: (value) {
-                  setState(() {
-                    // This is now updated directly with the controller
-                  });
-                },
                 decoration: const InputDecoration(labelText: "Item Name"),
               ),
               const SizedBox(height: 16),
-              // Note Input
               TextField(
                 controller: noteController,
-                onChanged: (value) {
-                  setState(() {
-                    // This is now updated directly with the controller
-                  });
-                },
                 decoration: const InputDecoration(labelText: "Note"),
               ),
               const SizedBox(height: 16),
-              // Price Input
               TextField(
                 controller: priceController,
                 keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  setState(() {
-                    // This is now updated directly with the controller
-                  });
-                },
                 decoration: const InputDecoration(labelText: "Price"),
               ),
               const SizedBox(height: 16),
-              // Link Input
               TextField(
                 controller: linkController,
-                onChanged: (value) {
-                  setState(() {
-                    // This is now updated directly with the controller
-                  });
-                },
                 decoration: const InputDecoration(labelText: "Link"),
               ),
               const SizedBox(height: 16),
-              // Category Dropdown
-              const Text(
-                "Categories",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+              const Text("Categories", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               DropdownButton<String>(
                 value: selectedCategory,
                 items: categories
-                    .map((category) => DropdownMenuItem<String>(
-                          value: category,
-                          child: Text(category),
-                        ))
+                    .map((category) => DropdownMenuItem<String>(value: category, child: Text(category)))
                     .toList(),
                 onChanged: (newValue) {
                   setState(() {
@@ -165,10 +169,7 @@ class _EditItemState extends State<EditItem> {
                 },
               ),
               const SizedBox(height: 16),
-              const Text(
-                "Upload Images",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+              const Text("Upload Images", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               GestureDetector(
                 onTap: _pickImages,
@@ -193,19 +194,13 @@ class _EditItemState extends State<EditItem> {
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    _selectedImages[index],
-                                    fit: BoxFit.cover,
-                                  ),
+                                  child: Image.network(_selectedImages[index], fit: BoxFit.cover),
                                 ),
                                 Positioned(
                                   top: 4,
                                   right: 4,
                                   child: IconButton(
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      color: Colors.red,
-                                    ),
+                                    icon: const Icon(Icons.delete, color: Colors.red),
                                     onPressed: () => _removeImage(index),
                                   ),
                                 ),
@@ -213,32 +208,12 @@ class _EditItemState extends State<EditItem> {
                             );
                           },
                         )
-                      : const Center(
-                          child: Icon(Icons.add_a_photo, color: Colors.yellow),
-                        ),
+                      : const Center(child: Icon(Icons.add_a_photo, color: Colors.yellow)),
                 ),
               ),
               const SizedBox(height: 16),
-              // Save Button
               ElevatedButton(
-                onPressed: () {
-                  // Create a new updated WishItem
-                  WishItem updatedItem = WishItem(
-                    title: titleController.text,
-                    note: noteController.text,
-                    image: _selectedImages, // Store base64 images directly
-                    price: double.tryParse(priceController.text) ?? 0,
-                    link: linkController.text,
-                    category: selectedCategory,
-                    isDone: widget.wishItem.isDone, // Maintain isDone state
-                  );
-
-                  // Call the onSave callback to pass updated item back
-                  widget.onSave(updatedItem);
-
-                  // Pop the Edit screen and return to the previous screen
-                  Navigator.pop(context);
-                },
+                onPressed: _updateItemInFirestore,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.blue[900],

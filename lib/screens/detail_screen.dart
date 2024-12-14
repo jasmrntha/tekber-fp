@@ -134,7 +134,8 @@ class _DetailScreenState extends State<DetailScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => EditItem(
-                          wishItem: widget.wish, // Pass the current wish item
+                          wishItem: widget.wish, // Pass the current wish item,
+                          documentId: widget.wish.id,
                           onSave: (updatedWishItem) {
                             setState(() {
                               widget.wish =
