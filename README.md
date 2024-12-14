@@ -1,6 +1,6 @@
-# final_project_2
+# Make A Wish
 
-A new Flutter project.
+final project mata kuliah teknologi berkembang
 
 ## Getting Started
 
