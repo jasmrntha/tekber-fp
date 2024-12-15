@@ -8,8 +8,8 @@ class Firestoreservice {
     return account.add({'email': email, 'password': password});
   }
 
-  Stream<QuerySnapshot> getAccountInfo() {
-    final accountInfo = account.orderBy('email', descending: true).snapshots();
-    return accountInfo;
+  Future<List<DocumentSnapshot>> getAccountInfo(String email) async {
+    QuerySnapshot streams = await account.where('email', isEqualTo: email).get();
+    return streams.docs;
   }
 }

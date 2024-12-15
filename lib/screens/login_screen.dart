@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:final_project_2/services/fireStoreService.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_2/screens/home_screen.dart';
 import 'package:final_project_2/screens/signup_screen.dart';
@@ -93,16 +95,32 @@ class InputForm extends StatefulWidget {
 }
 
 class _InputFormState extends State<InputForm> {
+  final Firestoreservice _firestoreservice = Firestoreservice();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
   String? emailErrorMessage;
   String? passwordErrorMessage;
+  Map<String, dynamic>? userData;
+  String? userPass;
+
+  Future<String?> checkEmailRegistration(String value) async {
+    List<DocumentSnapshot> emailAddress =
+        await _firestoreservice.getAccountInfo(value);
+    if (emailAddress.isEmpty) {
+      return 'Email is not registered';
+    } else {
+      userData = emailAddress.first.data() as Map<String, dynamic>?;
+      userPass = userData?['password'];
+    }
+    return null;
+  }
 
   // Email Validation
   String? validateEmail(String value) {
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     if (value.isEmpty) {
       return 'Email is required';
     } else if (!emailRegex.hasMatch(value)) {
@@ -113,19 +131,36 @@ class _InputFormState extends State<InputForm> {
 
   // Password Validation
   String? validatePassword(String value) {
-    final passwordRegex =
-        RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$');
     if (value.isEmpty) {
       return 'Password is required';
-    } else if (!passwordRegex.hasMatch(value)) {
-      return 'Password must be at least 8 characters long,\ninclude an uppercase letter, a lowercase letter, and a number.';
+    } else if (value != userPass) {
+      return 'Password not match for this email';
     }
     return null;
   }
 
+  void _submit() async {
+    String? emailErrorMessage1 = validateEmail(emailController.text);
+    String? passwordErrorMessage1 = validatePassword(passwordController.text);
+    String? emailErrorMessage2 =
+        await checkEmailRegistration(emailController.text);
+
+    setState(() {
+      emailErrorMessage = emailErrorMessage1 ?? emailErrorMessage2;
+      passwordErrorMessage = passwordErrorMessage1;
+      if (emailErrorMessage == null && passwordErrorMessage == null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
+    double screenWidthAll = MediaQuery.of(context).size.width;
+    double screenWidth = screenWidthAll * 0.8;
 
     return Form(
       key: _formKey,
@@ -139,26 +174,33 @@ class _InputFormState extends State<InputForm> {
               color: const Color(0xFF80A4FF),
               borderRadius: BorderRadius.circular(10),
             ),
-            width: screenWidth * 0.8,
+            width: screenWidth,
             child: Padding(
               padding: const EdgeInsets.only(left: 10),
               child: TextFormField(
                 controller: emailController,
                 style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Email',
                   border: InputBorder.none,
-                  labelStyle: const TextStyle(color: Colors.white, fontFamily: 'Poppins'),
-                  errorText: emailErrorMessage,
+                  labelStyle:
+                      TextStyle(color: Colors.white, fontFamily: 'Poppins'),
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    emailErrorMessage = validateEmail(value);
-                  });
-                },
               ),
             ),
           ),
+          if (emailErrorMessage != null)
+            Container(
+              width: screenWidth,
+              child: Padding(
+                padding: EdgeInsets.only(left: 10, top: 8),
+                child: Text(
+                  emailErrorMessage!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            ),
+
           const SizedBox(height: 10),
 
           // Password Field
@@ -167,7 +209,7 @@ class _InputFormState extends State<InputForm> {
               color: const Color(0xFF80A4FF),
               borderRadius: BorderRadius.circular(10),
             ),
-            width: screenWidth * 0.8,
+            width: screenWidth,
             child: Padding(
               padding: const EdgeInsets.only(left: 10),
               child: TextFormField(
@@ -177,10 +219,13 @@ class _InputFormState extends State<InputForm> {
                 decoration: InputDecoration(
                   labelText: 'Password',
                   border: InputBorder.none,
-                  labelStyle: const TextStyle(color: Colors.white, fontFamily: 'Poppins'),
+                  labelStyle: const TextStyle(
+                      color: Colors.white, fontFamily: 'Poppins'),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      _isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                       color: Colors.white,
                     ),
                     onPressed: () {
@@ -189,16 +234,22 @@ class _InputFormState extends State<InputForm> {
                       });
                     },
                   ),
-                  errorText: passwordErrorMessage,
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    passwordErrorMessage = validatePassword(value);
-                  });
-                },
               ),
             ),
           ),
+          if (passwordErrorMessage != null)
+            Container(
+              width: screenWidth,
+              child: Padding(
+                padding: EdgeInsets.only(left: 10, top: 8),
+                child: Text(
+                  passwordErrorMessage!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            ),
+
           const SizedBox(height: 5),
 
           // Forgot Password
@@ -209,7 +260,8 @@ class _InputFormState extends State<InputForm> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ForgotPasswordScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => ForgotPasswordScreen()),
                   );
                 },
                 child: const Padding(
@@ -230,32 +282,7 @@ class _InputFormState extends State<InputForm> {
 
           // Login Button
           ElevatedButton(
-            onPressed: () {
-              final email = emailController.text.trim();
-              final password = passwordController.text.trim();
-
-              // Validate form fields
-              if (_formKey.currentState!.validate()) {
-                if (emailErrorMessage == null && passwordErrorMessage == null) {
-                  // If validation passes and no errors
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomeScreen()),
-                  );
-                }
-              } else {
-                // Show error snackbars if fields are invalid
-                if (emailErrorMessage != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(emailErrorMessage!)),
-                  );
-                } else if (passwordErrorMessage != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(passwordErrorMessage!)),
-                  );
-                }
-              }
-            },
+            onPressed: _submit,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color.fromARGB(255, 199, 176, 81),
               shape: RoundedRectangleBorder(
@@ -267,7 +294,8 @@ class _InputFormState extends State<InputForm> {
             ),
             child: const Text(
               'Login',
-              style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Poppins'),
+              style: TextStyle(
+                  color: Colors.white, fontSize: 18, fontFamily: 'Poppins'),
             ),
           ),
         ],
