@@ -193,8 +193,9 @@ class _AddItemState extends State<AddItem> {
           imageBytes = await mobileFile.readAsBytes();
         }
 
-        // Convert to base64
-        String base64Image = base64Encode(imageBytes);
+        // Convert to base64 with MIME type prefix
+        String base64Image =
+            'data:image/jpeg;base64,' + base64Encode(imageBytes);
         base64Images.add(base64Image);
       } catch (e) {
         print('Error converting image: $e');
