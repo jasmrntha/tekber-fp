@@ -5,6 +5,8 @@ import 'package:final_project_2/models/wish_item.dart';
 import 'package:final_project_2/screens/profile_screen.dart';
 import 'package:final_project_2/screens/guide_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -84,10 +86,19 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void deleteWish(String id) {
-    setState(() {
+  void deleteWish(String id) async {
+    try {
+      // Menghapus dari Firestore
+      await FirebaseFirestore.instance.collection('wishlist').doc(id).delete();
+      
+      // Menghapus dari daftar lokal
+      setState(() {
       wishes.removeWhere((wish) => wish.id == id);
     });
+    } catch (e) {
+      // Menangani error jika penghapusan gagal
+      print("Error deleting wish: $e");
+    }
   }
 
   int _currentIndex = 0;
