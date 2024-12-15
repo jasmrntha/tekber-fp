@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:final_project_2/models/wish_item.dart';
 import 'package:final_project_2/screens/detail_screen.dart';
+import 'package:final_project_2/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -442,7 +443,10 @@ class _AddItemState extends State<AddItem> {
                       await _saveItemToFirestore(base64Images);
 
                       // Navigate back or clear the form
-                      Navigator.pop(context);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => HomeScreen()),
+                      );
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Error: $e")),

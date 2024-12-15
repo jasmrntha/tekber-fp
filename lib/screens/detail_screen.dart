@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:final_project_2/models/wish_item.dart';
 import 'package:final_project_2/screens/home_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class DetailScreen extends StatefulWidget {
   WishItem wish;
@@ -44,8 +46,21 @@ class _DetailScreenState extends State<DetailScreen> {
         iconTheme: IconThemeData(color: Colors.yellow),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
+              // Perbarui nilai di lokal
               widget.toggleDone();
+
+              // Perbarui nilai di Firebase
+              try {
+                await FirebaseFirestore.instance
+                    .collection('wishlist_2') 
+                    .doc(widget.wish.id)
+                    .update({
+                  'isDone': widget.wish.isDone,
+                });
+              } catch (e) {
+                print('Gagal memperbarui data: $e');
+              }
               Navigator.pop(context);
             },
             child: Padding(
@@ -249,11 +264,29 @@ class _DetailScreenState extends State<DetailScreen> {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                widget.onDelete(); // Call delete function
-                Navigator.of(context).pop(); // Close dialog
-                Navigator.of(context).pop(); // Go back to HomeScreen
-              },
+              onPressed: () async {
+              try {
+                // Hapus data dari Firebase
+                await FirebaseFirestore.instance
+                    .collection('wishlist_2') 
+                    .doc(widget.wish.id) 
+                    .delete();
+                
+                widget.onDelete();
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Wishlist successfully deleted')),
+                );
+              } catch (e) {
+                print('Error deleting wishlist: $e');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Failed to delete wishlist')),
+                );
+              }
+
+              Navigator.of(context).pop(); // Close dialog
+              Navigator.of(context).pop(); // Go back to HomeScreen
+            },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
               ),

@@ -7,6 +7,8 @@ import 'package:final_project_2/screens/profile_screen.dart';
 import 'package:final_project_2/screens/guide_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -61,30 +63,50 @@ class _HomeScreenState extends State<HomeScreen> {
     }).toList();
   }
 
-  void toggleDone(String id) {
-    setState(() {
-      final index = wishes.indexWhere((wish) => wish.id == id);
-      if (index != -1) {
-        final wish = wishes[index];
-        wish.toggleDone(); // Toggle the 'isDone' state using the method in WishItem
+  void addWish(WishItem newWish) {
+  setState(() {
+    wishes.insert(0, newWish); // Tambahkan item baru di bagian atas daftar
+  });
+}
 
-        // Reorder the list based on whether the wish is done or not
-        if (wish.isDone) {
-          wishes.removeAt(index);
-          wishes.add(wish); // Move the item to the bottom if it's done
-        } else {
-          wishes.removeAt(index);
-          wishes.insert(0, wish); // Move the item to the top if it's undone
-        }
+void toggleDone(String id) {
+  setState(() {
+    final index = wishes.indexWhere((wish) => wish.id == id);
+    if (index != -1) {
+      final wish = wishes[index];
+      wish.toggleDone(); // Toggle 'isDone' state
+
+      // Reorder the list based on 'isDone' status
+      wishes.removeAt(index);
+      if (wish.isDone) {
+        wishes.add(wish); // Pindahkan ke bawah jika selesai (done)
+      } else {
+        wishes.insert(0, wish); // Pindahkan ke atas jika belum selesai (undone)
       }
-    });
-  }
+    }
+  });
+}
 
-  void deleteWish(String id) {
+
+  void deleteWish(String id) async {
+  try {
+    await FirebaseFirestore.instance.collection('wishlist_2').doc(id).delete();
+
     setState(() {
       wishes.removeWhere((wish) => wish.id == id);
     });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Wishlist successfully deleted')),
+    );
+  } catch (e) {
+    print('Error deleting wishlist: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to delete wishlist')),
+    );
   }
+}
+
 
   int _currentIndex = 0;
   final PageController _pageController =
