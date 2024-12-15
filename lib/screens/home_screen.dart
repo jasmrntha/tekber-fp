@@ -1,3 +1,4 @@
+import 'package:final_project_2/models/wish_repository.dart';
 import 'package:final_project_2/screens/add_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_2/screens/detail_screen.dart';
@@ -5,6 +6,7 @@ import 'package:final_project_2/models/wish_item.dart';
 import 'package:final_project_2/screens/profile_screen.dart';
 import 'package:final_project_2/screens/guide_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -12,49 +14,39 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<WishItem> wishes = [
-    WishItem(
-      id: '1',
-      title: 'Jaket Coach KAWS + Warhol',
-      note: 'Ukuran S, warna navy',
-      price: 499000,
-      image: [
-        'assets/images/coach_jacket_1.jpg',
-        'assets/images/coach_jacket_2.jpg',
-      ],
-      link: 'uniqlo.com',
-      category: 'Fashion',
-    ),
-    WishItem(
-      id: '2',
-      title: 'New Balance 530 Unisex',
-      note: 'Ukuran 41, warna silver',
-      price: 1599000,
-      image: [
-        'assets/images/nb_530.jpg',
-      ],
-      link: 'footlocker.com',
-      category: 'Sport',
-    ),
-    WishItem(
-      id: '3',
-      title: 'New Balance 530 Kids',
-      note: 'Ukuran 20, warna putih',
-      price: 1599000,
-      image: [
-        'assets/images/nb_530.jpg',
-      ],
-      link: 'footlocker.com',
-      category: 'Sport',
-    ),
-  ];
+  final WishRepository _wishRepository = WishRepository();
+  late Future<List<WishItem>> _wishesFuture;
+  List<WishItem> wishes = [];
 
   String _searchQuery = '';
   String _filter = 'All';
 
+  @override
+  void initState() {
+    super.initState();
+
+    // Fetch the wishes and update the state
+    _wishesFuture = _wishRepository.fetchWishes().then((fetchedWishes) {
+      setState(() {
+        wishes = fetchedWishes; // Update the wish list
+      });
+      return fetchedWishes; // Ensure a value is always returned
+    });
+  }
+
   List<String> getFilters() {
-    final categories = wishes.map((wish) => wish.category).toSet().toList();
-    return ['All', 'Done', 'Undone', ...categories];
+    final categories = wishes
+        .where((wish) => wish.category != null && wish.category!.isNotEmpty)
+        .map((wish) => wish.category!)
+        .toSet()
+        .toList();
+
+    debugPrint("Categories extracted: $categories");
+
+    final filters = ['All', 'Done', 'Undone'];
+    debugPrint("Complete filter list: $filters");
+
+    return filters;
   }
 
   List<WishItem> getFilteredWishes() {
@@ -73,12 +65,16 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       final index = wishes.indexWhere((wish) => wish.id == id);
       if (index != -1) {
-        final wish = wishes.removeAt(index);
-        wish.isDone = !wish.isDone;
+        final wish = wishes[index];
+        wish.toggleDone(); // Toggle the 'isDone' state using the method in WishItem
+
+        // Reorder the list based on whether the wish is done or not
         if (wish.isDone) {
-          wishes.add(wish);
+          wishes.removeAt(index);
+          wishes.add(wish); // Move the item to the bottom if it's done
         } else {
-          wishes.insert(0, wish);
+          wishes.removeAt(index);
+          wishes.insert(0, wish); // Move the item to the top if it's undone
         }
       }
     });
@@ -96,10 +92,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final GlobalKey _bottomnavbarkeys = GlobalKey();
   final List<GlobalKey> _navbarkeys = [GlobalKey(), GlobalKey(), GlobalKey()];
-  void initState() {
-    super.initState();
-    _firstLoginCheck(context);
-  }
 
   Future<void> _firstLoginCheck(BuildContext context) async {
     SharedPreferences userPref = await SharedPreferences.getInstance();
@@ -108,16 +100,17 @@ class _HomeScreenState extends State<HomeScreen> {
     if (firstLogin) {
       await userPref.setBool('firstLogin', false);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) {
-            debugPrint('Keys: ${_navbarkeys.map((key) => key.currentContext)}');
-            return FirstGuide(bottomnavbarkeys: _navbarkeys);
-          },
-        ),
-      );
-    });
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              debugPrint(
+                  'Keys: ${_navbarkeys.map((key) => key.currentContext)}');
+              return FirstGuide(bottomnavbarkeys: _navbarkeys);
+            },
+          ),
+        );
+      });
     }
   }
 
@@ -130,24 +123,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final filters = getFilters();
+    debugPrint("Filters used in build: $filters");
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(
           _currentIndex == 0
-              ? 'Your Wish' // Judul untuk tab Home
+              ? 'Your Wish'
               : _currentIndex == 1
-                  ? 'Add Wish' // Judul untuk tab Add (jika ada)
-                  : 'Profile', // Judul untuk tab Profile
+                  ? 'Add Wish'
+                  : 'Profile',
           style: TextStyle(color: Colors.yellow, fontFamily: 'Poppins'),
         ),
         backgroundColor: Colors.blue[900],
       ),
       body: PageView(
-        controller: _pageController, // Hubungkan PageController
+        controller: _pageController,
         onPageChanged: (index) {
           setState(() {
-            _currentIndex = index; // Sinkronkan indeks dengan PageView
+            _currentIndex = index;
           });
         },
         children: [
@@ -163,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Row(
                         children: [
-                          Expanded(
+                          Flexible(
                             flex: 2,
                             child: TextField(
                               onChanged: (query) {
@@ -219,100 +215,132 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     final wish = getFilteredWishes()[index];
                     return Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 4,
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DetailScreen(
-                                wish: wish,
-                                toggleDone: () => toggleDone(wish.id),
-                                onDelete: () => deleteWish(wish.id),
-                              ),
-                            ),
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                wish.title,
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  decoration: wish.isDone
-                                      ? TextDecoration.lineThrough
-                                      : TextDecoration.none,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 4,
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DetailScreen(
+                                  wish: wish,
+                                  toggleDone: () => toggleDone(wish.id!),
+                                  onDelete: () => deleteWish(wish.id!),
                                 ),
                               ),
-                              SizedBox(height: 4),
-                              Text(
-                                wish.note,
-                                style: TextStyle(
-                                  color: Colors.grey[700],
-                                  fontSize: 14,
-                                  fontFamily: 'Poppins',
-                                  decoration: wish.isDone
-                                      ? TextDecoration.lineThrough
-                                      : TextDecoration.none,
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              SizedBox(
-                                height: 150,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: wish.image.length,
-                                  itemBuilder: (context, imageIndex) {
-                                    return Padding(
-                                      padding: const EdgeInsets.only(right: 8),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.asset(
-                                          wish.image[imageIndex],
-                                          width: 150,
-                                          height: 150,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(8),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  wish.title,
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    decoration: wish.isDone
+                                        ? TextDecoration.lineThrough
+                                        : TextDecoration.none,
                                   ),
-                                  child: Text(
-                                    wish.category,
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey[600],
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  wish.note,
+                                  style: TextStyle(
+                                    color: Colors.grey[700],
+                                    fontSize: 14,
+                                    fontFamily: 'Poppins',
+                                    decoration: wish.isDone
+                                        ? TextDecoration.lineThrough
+                                        : TextDecoration.none,
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                SizedBox(
+                                  height:
+                                      150, // Set a fixed height for the image container
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: wish.image.length,
+                                    itemBuilder: (context, imageIndex) {
+                                      try {
+                                        // Extract the base64 string after the prefix
+                                        final base64String = wish
+                                            .image[imageIndex]
+                                            .split('base64,')
+                                            .last;
+
+                                        // Decode the base64 string
+                                        final imageBytes =
+                                            base64Decode(base64String);
+
+                                        return Padding(
+                                          padding:
+                                              const EdgeInsets.only(right: 8),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            child: Image.memory(
+                                              imageBytes,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (context, error, stackTrace) {
+                                                // Handle errors in loading the image
+                                                return Container(
+                                                  color: Colors.grey,
+                                                  child: const Center(
+                                                    child: Icon(Icons.error,
+                                                        color: Colors.white),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        );
+                                      } catch (e) {
+                                        // Handle any errors during decoding
+                                        return Container(
+                                          color: Colors.grey,
+                                          child: const Center(
+                                            child: Icon(Icons.error,
+                                                color: Colors.white),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      wish.category,
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey[600],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ),
-                    );
+                        ));
                   },
                 ),
               ),

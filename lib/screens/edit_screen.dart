@@ -9,7 +9,11 @@ class EditItem extends StatefulWidget {
   final String documentId; // Document ID of the item to update
   final Function(WishItem) onSave; // Callback for saving updated item
 
-  const EditItem({super.key, required this.wishItem, required this.onSave, required this.documentId});
+  const EditItem(
+      {super.key,
+      required this.wishItem,
+      required this.onSave,
+      required this.documentId});
 
   @override
   State<EditItem> createState() => _EditItemState();
@@ -24,8 +28,14 @@ class _EditItemState extends State<EditItem> {
   String selectedCategory = '';
   List<String> _selectedImages = []; // Store images as base64 strings
 
-  final List<String> categories = ['Household Item', 'Fashion', 'Sport', 'Books'];
+  final List<String> categories = [
+    'Household Item',
+    'Fashion',
+    'Sport',
+    'Books'
+  ];
 
+  @override
   @override
   void initState() {
     super.initState();
@@ -33,9 +43,17 @@ class _EditItemState extends State<EditItem> {
     titleController = TextEditingController(text: widget.wishItem.title);
     noteController = TextEditingController(text: widget.wishItem.note);
     linkController = TextEditingController(text: widget.wishItem.link);
-    priceController = TextEditingController(text: widget.wishItem.price.toString());
+    priceController =
+        TextEditingController(text: widget.wishItem.price.toString());
 
-    selectedCategory = widget.wishItem.category;
+    // Check if the selectedCategory is one of the valid options
+    if (categories.contains(widget.wishItem.category)) {
+      selectedCategory = widget.wishItem.category;
+    } else {
+      // If the category is invalid, use a default category
+      selectedCategory = categories.first;
+    }
+
     _selectedImages = widget.wishItem.image;
   }
 
@@ -45,7 +63,30 @@ class _EditItemState extends State<EditItem> {
       final List<String> base64Images = [];
       for (var pickedFile in pickedFiles) {
         final bytes = await pickedFile.readAsBytes();
-        final base64Image = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+        final extension = pickedFile.name.split('.').last.toLowerCase();
+
+        String mimeType = '';
+        switch (extension) {
+          case 'jpg':
+          case 'jpeg':
+            mimeType = 'image/jpeg';
+            break;
+          case 'png':
+            mimeType = 'image/png';
+            break;
+          case 'gif':
+            mimeType = 'image/gif';
+            break;
+          case 'webp':
+            mimeType = 'image/webp';
+            break;
+          default:
+            mimeType =
+                'image/jpeg'; // Fallback to jpeg if the extension is unsupported
+            break;
+        }
+
+        final base64Image = 'data:$mimeType;base64,${base64Encode(bytes)}';
         base64Images.add(base64Image);
       }
       setState(() {
@@ -84,12 +125,14 @@ class _EditItemState extends State<EditItem> {
 
       // Update the document in Firestore using the document ID
       await FirebaseFirestore.instance
-          .collection('wish_items') // Make sure you use the correct collection name
+          .collection(
+              'wishlist_2') // Make sure you use the correct collection name
           .doc(widget.documentId) // Update the document using its ID
           .update(updatedItemData);
 
       // Call the onSave callback after successful Firestore update
       widget.onSave(WishItem(
+        id: widget.wishItem.id,
         title: titleController.text,
         note: noteController.text,
         image: _selectedImages,
@@ -156,11 +199,15 @@ class _EditItemState extends State<EditItem> {
                 decoration: const InputDecoration(labelText: "Link"),
               ),
               const SizedBox(height: 16),
-              const Text("Categories", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const Text("Categories",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               DropdownButton<String>(
-                value: selectedCategory,
+                value: selectedCategory.isNotEmpty
+                    ? selectedCategory
+                    : categories.first, // Default fallback
                 items: categories
-                    .map((category) => DropdownMenuItem<String>(value: category, child: Text(category)))
+                    .map((category) => DropdownMenuItem<String>(
+                        value: category, child: Text(category)))
                     .toList(),
                 onChanged: (newValue) {
                   setState(() {
@@ -169,7 +216,8 @@ class _EditItemState extends State<EditItem> {
                 },
               ),
               const SizedBox(height: 16),
-              const Text("Upload Images", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const Text("Upload Images",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               GestureDetector(
                 onTap: _pickImages,
@@ -183,32 +231,58 @@ class _EditItemState extends State<EditItem> {
                   ),
                   child: _selectedImages.isNotEmpty
                       ? GridView.builder(
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 3,
                             crossAxisSpacing: 8,
                             mainAxisSpacing: 8,
                           ),
                           itemCount: _selectedImages.length,
                           itemBuilder: (context, index) {
-                            return Stack(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(_selectedImages[index], fit: BoxFit.cover),
-                                ),
-                                Positioned(
-                                  top: 4,
-                                  right: 4,
-                                  child: IconButton(
-                                    icon: const Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () => _removeImage(index),
+                            try {
+                              // Decode base64 string to bytes
+                              final imageBytes = base64Decode(
+                                  _selectedImages[index].split(',').last);
+
+                              return Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.memory(
+                                      imageBytes,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Container(
+                                          color: Colors.red,
+                                          child: const Center(
+                                            child: Icon(Icons.error,
+                                                color: Colors.white),
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ),
-                                ),
-                              ],
-                            );
+                                  Positioned(
+                                    top: 4,
+                                    right: 4,
+                                    child: IconButton(
+                                      icon: const Icon(Icons.delete,
+                                          color: Colors.red),
+                                      onPressed: () => _removeImage(index),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            } catch (e) {
+                              // Handle any errors that may occur during base64 decoding or image loading
+                              return const Center(
+                                  child: Icon(Icons.error, color: Colors.red));
+                            }
                           },
                         )
-                      : const Center(child: Icon(Icons.add_a_photo, color: Colors.yellow)),
+                      : const Center(
+                          child: Icon(Icons.add_a_photo, color: Colors.yellow)),
                 ),
               ),
               const SizedBox(height: 16),
@@ -223,7 +297,8 @@ class _EditItemState extends State<EditItem> {
                   ),
                   side: BorderSide(color: Colors.blue[200]!),
                 ),
-                child: const Text("SAVE", style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Text("SAVE",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ],
           ),

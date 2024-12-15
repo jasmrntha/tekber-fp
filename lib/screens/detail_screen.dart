@@ -1,3 +1,4 @@
+import 'dart:convert'; // Import for base64 decoding
 import 'package:final_project_2/screens/edit_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -44,8 +45,8 @@ class _DetailScreenState extends State<DetailScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              widget.toggleDone(); 
-              Navigator.pop(context); 
+              widget.toggleDone();
+              Navigator.pop(context);
             },
             child: Padding(
               padding: EdgeInsets.only(right: 16),
@@ -86,12 +87,38 @@ class _DetailScreenState extends State<DetailScreen> {
                   });
                 },
                 itemBuilder: (context, index) {
-                  return Image.network(
-                    widget.wish.image[index],
-                    width: 200,
-                    height: 200,
-                    fit: BoxFit.contain,
-                  );
+                  try {
+                    // Extract base64 string after the prefix
+                    final base64String =
+                        widget.wish.image[index].split('base64,').last;
+
+                    // Decode the base64 string and display the image
+                    final imageBytes = base64Decode(base64String);
+
+                    return Image.memory(
+                      imageBytes,
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        // Handle errors in loading the image (e.g., invalid base64 data)
+                        return Container(
+                          color: Colors.grey,
+                          child: const Center(
+                            child: Icon(Icons.error, color: Colors.white),
+                          ),
+                        );
+                      },
+                    );
+                  } catch (e) {
+                    // Handle errors during base64 decoding
+                    return Container(
+                      color: Colors.grey,
+                      child: const Center(
+                        child: Icon(Icons.error, color: Colors.white),
+                      ),
+                    );
+                  }
                 },
               ),
             ),
@@ -134,8 +161,8 @@ class _DetailScreenState extends State<DetailScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => EditItem(
-                          wishItem: widget.wish, // Pass the current wish item,
-                          documentId: widget.wish.id,
+                          wishItem: widget.wish, // Pass the current wish item
+                          documentId: widget.wish.id ?? '',
                           onSave: (updatedWishItem) {
                             setState(() {
                               widget.wish =
@@ -156,7 +183,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 ElevatedButton(
                   onPressed: () => _showDeleteConfirmation(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:  Colors.red,
+                    backgroundColor: Colors.red,
                   ),
                   child: Text(
                     'DELETE',
@@ -211,7 +238,7 @@ class _DetailScreenState extends State<DetailScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Tutup dialog
+                Navigator.of(context).pop(); // Close dialog
               },
               child: Text(
                 'Cancel',
@@ -223,9 +250,9 @@ class _DetailScreenState extends State<DetailScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                widget.onDelete(); // Panggil fungsi hapus
-                Navigator.of(context).pop(); // Tutup dialog
-                Navigator.of(context).pop(); // Kembali ke HomeScreen
+                widget.onDelete(); // Call delete function
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).pop(); // Go back to HomeScreen
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,

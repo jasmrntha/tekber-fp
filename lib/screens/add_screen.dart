@@ -52,15 +52,40 @@ class _AddItemState extends State<AddItem> {
 
   // Pick images using the image_picker package for mobile
   Future<void> _pickImages() async {
-    if (kIsWeb) {
-      _pickImagesWeb();
-    } else {
-      final pickedFiles = await ImagePicker().pickMultiImage();
-      if (pickedFiles != null) {
-        setState(() {
-          _selectedImages = pickedFiles.map((e) => File(e.path)).toList();
-        });
+    final pickedFiles = await ImagePicker().pickMultiImage();
+    if (pickedFiles != null) {
+      final List<String> base64Images = [];
+      for (var pickedFile in pickedFiles) {
+        final bytes = await pickedFile.readAsBytes();
+        final extension = pickedFile.name.split('.').last.toLowerCase();
+
+        String mimeType = '';
+        switch (extension) {
+          case 'jpg':
+          case 'jpeg':
+            mimeType = 'image/jpeg';
+            break;
+          case 'png':
+            mimeType = 'image/png';
+            break;
+          case 'gif':
+            mimeType = 'image/gif';
+            break;
+          case 'webp':
+            mimeType = 'image/webp';
+            break;
+          default:
+            mimeType =
+                'image/jpeg'; // Fallback to jpeg if the extension is unsupported
+            break;
+        }
+
+        final base64Image = 'data:$mimeType;base64,${base64Encode(bytes)}';
+        base64Images.add(base64Image);
       }
+      setState(() {
+        _selectedImages.addAll(base64Images);
+      });
     }
   }
 
@@ -129,14 +154,15 @@ class _AddItemState extends State<AddItem> {
   // Save item to Firestore
   Future<void> _saveItemToFirestore(List<String> base64Images) async {
     try {
-      await FirebaseFirestore.instance.collection('wishlist').add({
+      await FirebaseFirestore.instance.collection('wishlist_2').add({
         'title': title,
         'note': note,
         'link': link,
         'price': price,
         'category': selectedCategory.name,
-        'images': base64Images, // Store base64 encoded images
+        'image': base64Images, // Store base64 encoded images
         'createdAt': FieldValue.serverTimestamp(),
+        'isDone': false,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -212,34 +238,25 @@ class _AddItemState extends State<AddItem> {
         ),
         itemCount: _selectedImages.length,
         itemBuilder: (context, index) {
-          final file = _selectedImages[index] as html.File;
+          final base64Image = _selectedImages[index];
+          final imageBytes = base64Decode(base64Image
+              .split(',')
+              .last); // Remove the prefix "data:image/jpeg;base64," if it's there
+
           return Stack(
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: FutureBuilder<Uint8List>(
-                  future: _readFileAsBytes(file),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      if (snapshot.hasData) {
-                        return Image.memory(
-                          snapshot.data!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.red,
-                              child: const Center(
-                                child: Icon(Icons.error, color: Colors.white),
-                              ),
-                            );
-                          },
-                        );
-                      } else {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                    } else {
-                      return const Center(child: CircularProgressIndicator());
-                    }
+                child: Image.memory(
+                  imageBytes,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.red,
+                      child: const Center(
+                        child: Icon(Icons.error, color: Colors.white),
+                      ),
+                    );
                   },
                 ),
               ),
@@ -272,13 +289,26 @@ class _AddItemState extends State<AddItem> {
         ),
         itemCount: _selectedImages.length,
         itemBuilder: (context, index) {
+          // Decode base64 image string into bytes
+          final base64Image = _selectedImages[index];
+          final imageBytes = base64Decode(
+              base64Image.split(',').last); // Remove the prefix if present
+
           return Stack(
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.file(
-                  _selectedImages[index] as File,
+                child: Image.memory(
+                  imageBytes,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.red,
+                      child: const Center(
+                        child: Icon(Icons.error, color: Colors.white),
+                      ),
+                    );
+                  },
                 ),
               ),
               Positioned(
