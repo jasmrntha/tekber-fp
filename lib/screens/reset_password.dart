@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:final_project_2/screens/home_screen.dart';
 
+
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
 
@@ -102,7 +103,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               ElevatedButton(
                 onPressed: () {
                   final newPassword = _newPasswordController.text.trim();
-                  final confirmPassword = _confirmPasswordController.text.trim();
+                  final confirmPassword =
+                      _confirmPasswordController.text.trim();
 
                   if (newPassword.isEmpty || confirmPassword.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +144,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     );
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => HomeScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => const HomeScreen()),
                     );
                   }
                 },
