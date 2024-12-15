@@ -11,6 +11,7 @@ import 'package:final_project_2/screens/detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:final_project_2/screens/home_screen.dart';
 
 enum Category {
   householdItem,
@@ -412,7 +413,11 @@ class _AddItemState extends State<AddItem> {
                       await _saveItemToFirestore(base64Images);
 
                       // Navigate back or clear the form
-                      Navigator.pop(context);
+                      // Navigator.pop(context);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => HomeScreen()),
+                      );
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Error: $e")),
