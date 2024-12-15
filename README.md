@@ -4,7 +4,7 @@ Final Project Mata Kuliah Teknologi Berkembang
 
 disusun oleh:
 <li><a href="https://github.com/dwiindahr">Dwi</a></li>
-<li><a href="https://github.com/jasmrntha">Jasmin</a></li>
+<li><a href="https://github.com/jasmrntha">Jasmine</a></li>
 <li><a href="https://github.com/vopula">Alka</a></li>
 <li><a href="https://github.com/Arayzi">Aray</a></li>
 
