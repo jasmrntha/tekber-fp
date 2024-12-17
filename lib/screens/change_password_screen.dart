@@ -94,27 +94,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 obscureText: !_isConfirmPasswordVisible,
                 style: const TextStyle(fontFamily: 'Poppins'),
               ),
-              const SizedBox(height: 32),
-              Align(
-                alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ForgotPasswordScreen()),
-                    );
-                  },
-                  child: const Text(
-                    'Forgot Password?',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
+              
               ElevatedButton(
                 onPressed: () {
                   final newPassword = _newPasswordController.text.trim();
