@@ -10,7 +10,7 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final Firestoreservice firestoreservice = Firestoreservice();
+  final AccountServices firestoreservice = AccountServices();
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();

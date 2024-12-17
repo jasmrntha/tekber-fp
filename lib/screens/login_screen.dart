@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_project_2/services/fireStoreService.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_2/screens/home_screen.dart';
 import 'package:final_project_2/screens/signup_screen.dart';
@@ -95,7 +96,7 @@ class InputForm extends StatefulWidget {
 }
 
 class _InputFormState extends State<InputForm> {
-  final Firestoreservice _firestoreservice = Firestoreservice();
+  final AccountServices _firestoreservice = AccountServices();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -104,6 +105,7 @@ class _InputFormState extends State<InputForm> {
   String? passwordErrorMessage;
   Map<String, dynamic>? userData;
   String? userPass;
+  bool isLoading = false;
 
   Future<String?> checkEmailRegistration(String value) async {
     List<DocumentSnapshot> emailAddress =
@@ -140,21 +142,103 @@ class _InputFormState extends State<InputForm> {
   }
 
   void _submit() async {
+    // Early mounted check
+    if (!mounted) return;
+
+    // Validate inputs
     String? emailErrorMessage1 = validateEmail(emailController.text);
     String? passwordErrorMessage1 = validatePassword(passwordController.text);
-    String? emailErrorMessage2 =
-        await checkEmailRegistration(emailController.text);
+    String? emailErrorMessage2;
+
+    try {
+      emailErrorMessage2 = await checkEmailRegistration(emailController.text);
+    } catch (e) {
+      print('Email registration check failed: $e');
+    }
+
+    // Check if still mounted before setState
+    if (!mounted) return;
 
     setState(() {
       emailErrorMessage = emailErrorMessage1 ?? emailErrorMessage2;
       passwordErrorMessage = passwordErrorMessage1;
-      if (emailErrorMessage == null && passwordErrorMessage == null) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
-        );
-      }
     });
+
+    // Only proceed if no error messages and still mounted
+    if (emailErrorMessage == null && passwordErrorMessage == null) {
+      try {
+        // Check mounted before setting state
+        if (!mounted) return;
+
+        setState(() {
+          isLoading = true;
+        });
+
+        String email = emailController.text.trim();
+        String password = passwordController.text.trim();
+
+        // Sign in the user
+        UserCredential userCredential = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(email: email, password: password);
+
+        // Check if the user is logged in
+        final user = userCredential.user;
+        if (user != null) {
+          print('Logged in as: ${user.uid}');
+
+          // Use Navigator.of(context) instead of direct context navigation
+          if (mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => HomeScreen()),
+            );
+          }
+        } else {
+          print('User login failed');
+
+          // Show error if still mounted
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Login failed. No user found.')),
+            );
+          }
+        }
+      } catch (e) {
+        print('Error during login: $e');
+
+        String errorMessage = 'Login failed. Please check your credentials.';
+
+        if (e is FirebaseAuthException) {
+          switch (e.code) {
+            case 'user-not-found':
+              errorMessage = 'No user found for that email.';
+              break;
+            case 'wrong-password':
+              errorMessage = 'Incorrect password.';
+              break;
+            case 'invalid-email':
+              errorMessage = 'The email address is malformed.';
+              break;
+            default:
+              errorMessage = 'An unknown error occurred.';
+              break;
+          }
+        }
+
+        // Only show SnackBar if still mounted
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorMessage)),
+          );
+        }
+      } finally {
+        // Final mounted check before setting state
+        if (mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
+      }
+    }
   }
 
   @override
