@@ -1,36 +1,25 @@
-import 'package:flutter/material.dart';
-import 'package:final_project_2/screens/forgot_password_screen.dart';
+import 'dart:async';
 
-class ChangePasswordScreen extends StatefulWidget {
+import 'package:final_project_2/services/fireStoreService.dart';
+import 'package:flutter/material.dart';
+
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
+
   @override
-  _ChangePasswordScreenState createState() => _ChangePasswordScreenState();
+  _ForgotPasswordScreenState createState() => _ForgotPasswordScreenState();
 }
 
-class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
-  final _currentPasswordController = TextEditingController();
-  final _newPasswordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-
-  bool _isCurrentPasswordVisible = false;
-  bool _isNewPasswordVisible = false;
-  bool _isConfirmPasswordVisible = false;
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  final _emailController = TextEditingController();
+  final _authService = AuthServices();
+  bool sent = false;
+  int countDown = 0;
 
   @override
   void dispose() {
-    _currentPasswordController.dispose();
-    _newPasswordController.dispose();
-    _confirmPasswordController.dispose();
+    _emailController.dispose();
     super.dispose();
-  }
-
-  // Validasi password: minimal 8 karakter, mengandung huruf besar, huruf kecil, dan angka
-  bool _isPasswordValid(String password) {
-    final regex = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$');
-    return regex.hasMatch(password);
-  }
-
-  bool _isPasswordMatch(String password, String confirmPassword) {
-    return password == confirmPassword;
   }
 
   @override
@@ -38,173 +27,127 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Change Password',
+          'Forgot Password',
           style: TextStyle(
             fontFamily: 'Poppins',
             color: Colors.yellow,
           ),
         ),
         backgroundColor: Colors.blue[900],
-        iconTheme: IconThemeData(color: Colors.yellow),
+        iconTheme: const IconThemeData(color: Colors.yellow),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Current Password Field
-              TextField(
-                controller: _currentPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'Current Password',
-                  labelStyle: TextStyle(fontFamily: 'Poppins'),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isCurrentPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isCurrentPasswordVisible = !_isCurrentPasswordVisible;
-                      });
-                    },
-                  ),
+              const Text(
+                'Enter your email to reset your password',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 16,
                 ),
-                obscureText: !_isCurrentPasswordVisible,
-                style: const TextStyle(fontFamily: 'Poppins'),
               ),
               const SizedBox(height: 16),
-
-              // New Password Field
+              // Email Field
               TextField(
-                controller: _newPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'New Password',
+                controller: _emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
                   labelStyle: TextStyle(fontFamily: 'Poppins'),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isNewPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isNewPasswordVisible = !_isNewPasswordVisible;
-                      });
-                    },
-                  ),
+                  border: OutlineInputBorder(),
                 ),
-                obscureText: !_isNewPasswordVisible,
+                keyboardType: TextInputType.emailAddress,
                 style: const TextStyle(fontFamily: 'Poppins'),
               ),
-              const SizedBox(height: 16),
-
-              // Confirm Password Field
-              TextField(
-                controller: _confirmPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'Confirm Password',
-                  labelStyle: TextStyle(fontFamily: 'Poppins'),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isConfirmPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-                      });
-                    },
-                  ),
+              if (countDown > 0) const SizedBox(height: 16),
+              if (countDown > 0)
+                Row(
+                  children: [
+                    const Text('Please wait '),
+                    Text('$countDown'),
+                    const Text(' to resend password request'),
+                  ],
                 ),
-                obscureText: !_isConfirmPasswordVisible,
-                style: const TextStyle(fontFamily: 'Poppins'),
-              ),
               const SizedBox(height: 32),
+              // Submit Button
+              Center(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      if (countDown == 0) {
+                        final email = _emailController.text.trim();
 
-              Align(
-                alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ForgotPasswordScreen()),
-                    );
+                        if (email.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Please enter your email.',
+                                style: TextStyle(fontFamily: 'Poppins'),
+                              ),
+                            ),
+                          );
+                        } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                            .hasMatch(email)) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Please enter a valid email address.',
+                                style: TextStyle(fontFamily: 'Poppins'),
+                              ),
+                            ),
+                          );
+                        } else {
+                          // ScaffoldMessenger.of(context).showSnackBar(
+                          //   SnackBar(
+                          //     content: Text(
+                          //       'Password reset link sent to $email',
+                          //       style: const TextStyle(fontFamily: 'Poppins'),
+                          //     ),
+                          //   ),
+                          // );
+                          // Navigator.pop(context);
+
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //       builder: (context) => const ResetPasswordScreen()),
+                          // );
+                        }
+                        await _authService.sendLinkEmail(email: email);
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                                'An reset password link has sent to $email, please check')));
+                        setState(() {
+                          countDown = 60;
+                        });
+                        Timer.periodic(const Duration(seconds: 1), (timer) {
+                          setState(() {
+                            if (countDown == 0) {
+                              timer.cancel();
+                            } else {
+                              countDown--;
+                            }
+                          });
+                          print('seconds: $countDown');
+                        });
+                      }
+                    } catch (e) {
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text('$e')));
+                    }
                   },
-                  child: const Text(
-                    'Forgot Password?',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: countDown > 0
+                        ? Colors.grey
+                        : const Color.fromARGB(255, 169, 199, 243),
                   ),
-                ),
-              ),
-
-              // Save Button
-              ElevatedButton(
-                onPressed: () {
-                  final currentPassword = _currentPasswordController.text.trim();
-                  final newPassword = _newPasswordController.text.trim();
-                  final confirmPassword = _confirmPasswordController.text.trim();
-
-                  // Validasi untuk memastikan kolom tidak kosong
-                  if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Please fill in all fields.',
-                          style: TextStyle(fontFamily: 'Poppins'),
-                        ),
-                      ),
-                    );
-                  } else if (!_isPasswordValid(currentPassword)) {  // Validasi untuk currentPassword
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Current password must be at least 8 characters long, contain uppercase, lowercase, and a number.',
-                          style: TextStyle(fontFamily: 'Poppins'),
-                        ),
-                      ),
-                    );
-                  } else if (!_isPasswordValid(newPassword)) {  // Validasi untuk newPassword
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'New password must be at least 8 characters long, contain uppercase, lowercase, and a number.',
-                          style: TextStyle(fontFamily: 'Poppins'),
-                        ),
-                      ),
-                    );
-                  } else if (!_isPasswordMatch(newPassword, confirmPassword)) {  // Validasi untuk confirmPassword
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Passwords do not match', style: TextStyle(fontFamily: 'Poppins')),
-                      ),
-                    );
-                  } else if (newPassword == currentPassword) {  // Validasi untuk memastikan password baru tidak sama dengan password lama
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('New password cannot be the same as the current password', style: TextStyle(fontFamily: 'Poppins')),
-                      ),
-                    );
-                  } else {
-                    // Password valid dan cocok
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Password successfully changed!', style: TextStyle(fontFamily: 'Poppins'))),
-                    );
-                    Navigator.pop(context);
-                  }
-                },
-                child: const Text(
-                  'Save New Password',
-                  style: TextStyle(fontFamily: 'Poppins', color: Colors.black),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 169, 199, 243),
+                  child: const Text(
+                    'Send Reset Link',
+                    style:
+                        TextStyle(fontFamily: 'Poppins', color: Colors.black),
+                  ),
                 ),
               ),
             ],
