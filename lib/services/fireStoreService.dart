@@ -35,3 +35,18 @@ class AccountServices {
     }
   }
 }
+
+
+class AuthServices {
+  final _auth = FirebaseAuth.instance;
+
+  Future sendLinkEmail({required String email}) async {
+    try {
+      await _auth.sendPasswordResetEmail(
+        email: email,
+      );
+    } on FirebaseAuthException catch (_) {
+      rethrow;
+    }
+  }
+}
