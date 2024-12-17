@@ -18,23 +18,7 @@ class ProfileScreen extends StatelessWidget {
                 color: Colors.white,
               ),
             ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ChangePasswordScreen()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 169, 199, 243),
-                minimumSize: const Size(200, 50), // Ukuran tombol
-              ),
-              child: const Text(
-                'CHANGE PASSWORD',
-                style: TextStyle(fontFamily: 'Poppins', color: Colors.black),
-              ),
-            ),
+            
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
