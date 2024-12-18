@@ -42,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
     });
+    _firstLoginCheck(context);
   }
 
   void _loadInitialWishes() async {

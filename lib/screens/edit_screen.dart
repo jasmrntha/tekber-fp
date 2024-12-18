@@ -30,9 +30,9 @@ class _EditItemState extends State<EditItem> {
 
   final List<String> categories = [
     'Household Item',
-    'Fashion',
-    'Sport',
-    'Books'
+    'Electronics',
+    'Clothing',
+    'Groceries'
   ];
 
   @override
