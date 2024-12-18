@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_project_2/services/fireStoreService.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_2/screens/home_screen.dart';
 import 'package:final_project_2/screens/signup_screen.dart';
@@ -95,27 +96,13 @@ class InputForm extends StatefulWidget {
 }
 
 class _InputFormState extends State<InputForm> {
-  final Firestoreservice _firestoreservice = Firestoreservice();
+  final AuthServices _firestoreservice = AuthServices();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
   String? emailErrorMessage;
   String? passwordErrorMessage;
-  Map<String, dynamic>? userData;
-  String? userPass;
-
-  Future<String?> checkEmailRegistration(String value) async {
-    List<DocumentSnapshot> emailAddress =
-        await _firestoreservice.getAccountInfo(value);
-    if (emailAddress.isEmpty) {
-      return 'Email is not registered';
-    } else {
-      userData = emailAddress.first.data() as Map<String, dynamic>?;
-      userPass = userData?['password'];
-    }
-    return null;
-  }
 
   // Email Validation
   String? validateEmail(String value) {
@@ -133,8 +120,6 @@ class _InputFormState extends State<InputForm> {
   String? validatePassword(String value) {
     if (value.isEmpty) {
       return 'Password is required';
-    } else if (value != userPass) {
-      return 'Password not match for this email';
     }
     return null;
   }
@@ -142,12 +127,17 @@ class _InputFormState extends State<InputForm> {
   void _submit() async {
     String? emailErrorMessage1 = validateEmail(emailController.text);
     String? passwordErrorMessage1 = validatePassword(passwordController.text);
-    String? emailErrorMessage2 =
-        await checkEmailRegistration(emailController.text);
-
+    String? emailErrorMessage2 = await _firestoreservice.userInDatabase(
+        emailController.text, passwordController.text);
+    // User? asd123 = await _firestoreservice.asd123(
+    //     emailController.text, passwordController.text);
+    // String? passwordErrorMessage2 = await _firestoreservice
+    //     .userPasswordInDatabase(emailController.text, passwordController.text);
+    // print(
+    //     'eeeeeeeeeeeeeeeeee: ${emailErrorMessage2}, ${passwordErrorMessage2}');
     setState(() {
-      emailErrorMessage = emailErrorMessage1 ?? emailErrorMessage2;
-      passwordErrorMessage = passwordErrorMessage1;
+      emailErrorMessage = emailErrorMessage1;
+      passwordErrorMessage = passwordErrorMessage1 ?? emailErrorMessage2;
       if (emailErrorMessage == null && passwordErrorMessage == null) {
         Navigator.push(
           context,

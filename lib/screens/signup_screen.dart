@@ -1,8 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_project_2/services/fireStoreService.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_2/screens/login_screen.dart';
-import 'package:final_project_2/screens/home_screen.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -10,7 +8,7 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final Firestoreservice firestoreservice = Firestoreservice();
+  final AuthServices firestoreservice = AuthServices();
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -215,7 +213,8 @@ class _SignUpPageState extends State<SignUpPage> {
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
                               // All validations are passed, proceed to Home screen
-                              firestoreservice.addAccount(emailController.text,
+                              firestoreservice.signUpAccount(
+                                  emailController.text,
                                   passwordController.text);
                               emailController.clear();
                               passwordController.clear();
