@@ -1,5 +1,4 @@
 import 'package:final_project_2/screens/login_screen.dart';
-import 'package:final_project_2/screens/change_password_screen.dart'; 
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatelessWidget {
