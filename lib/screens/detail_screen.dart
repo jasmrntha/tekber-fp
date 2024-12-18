@@ -53,7 +53,7 @@ class _DetailScreenState extends State<DetailScreen> {
               // Perbarui nilai di Firebase
               try {
                 await FirebaseFirestore.instance
-                    .collection('wishlist_2') 
+                    .collection('wishlist_2')
                     .doc(widget.wish.id)
                     .update({
                   'isDone': widget.wish.isDone,
@@ -265,28 +265,38 @@ class _DetailScreenState extends State<DetailScreen> {
             ),
             ElevatedButton(
               onPressed: () async {
-              try {
-                // Hapus data dari Firebase
-                await FirebaseFirestore.instance
-                    .collection('wishlist_2') 
-                    .doc(widget.wish.id) 
-                    .delete();
-                
-                widget.onDelete();
+                try {
+                  // Delete data from Firebase
+                  await FirebaseFirestore.instance
+                      .collection('wishlist_2')
+                      .doc(widget.wish.id)
+                      .delete();
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Wishlist successfully deleted')),
-                );
-              } catch (e) {
-                print('Error deleting wishlist: $e');
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Failed to delete wishlist')),
-                );
-              }
+                  // Ensure widget is still mounted before calling callback or showing a SnackBar
+                  if (mounted) {
+                    widget.onDelete();
 
-              Navigator.of(context).pop(); // Close dialog
-              Navigator.of(context).pop(); // Go back to HomeScreen
-            },
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Wishlist successfully deleted')),
+                    );
+
+                    // Use only one pop to close both the dialog and go back
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomeScreen()),
+                    );
+                  }
+                } catch (e) {
+                  print('Error deleting wishlist: $e');
+
+                  // Show error message only if the widget is still mounted
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to delete wishlist')),
+                    );
+                  }
+                }
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
               ),

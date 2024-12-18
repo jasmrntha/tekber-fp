@@ -43,7 +43,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             color: Colors.yellow,
           ),
         ),
+<<<<<<< HEAD
         // backgroundColor: Colors.blue[900](citation_900),
+=======
+        backgroundColor: Colors.blue[900],
+>>>>>>> 1789ac33cd312c7c493ac4c20a263a6a124c1375
         iconTheme: const IconThemeData(color: Colors.yellow),
       ),
       body: Padding(

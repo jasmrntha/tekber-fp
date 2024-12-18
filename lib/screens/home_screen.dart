@@ -17,23 +17,53 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final WishRepository _wishRepository = WishRepository();
-  late Future<List<WishItem>> _wishesFuture;
+  late Stream<List<WishItem>> _wishesFuture;
   List<WishItem> wishes = [];
 
   String _searchQuery = '';
   String _filter = 'All';
 
   @override
+  @override
   void initState() {
     super.initState();
 
-    // Fetch the wishes and update the state
-    _wishesFuture = _wishRepository.fetchWishes().then((fetchedWishes) {
-      setState(() {
-        wishes = fetchedWishes; // Update the wish list
-      });
-      return fetchedWishes; // Ensure a value is always returned
+    _wishRepository.fetchWishesStream().listen((fetchedWishes) {
+      if (mounted) {
+        setState(() {
+          wishes = fetchedWishes;
+        });
+      }
+    }, onError: (error) {
+      print('Error fetching wishes: $error');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load wishes')),
+        );
+      }
     });
+  }
+
+  void _loadInitialWishes() async {
+    try {
+      // Listen to the first event in the stream
+      await for (final fetchedWishes in _wishesFuture.take(1)) {
+        if (mounted) {
+          setState(() {
+            wishes = fetchedWishes;
+          });
+        }
+        break; // Exit after the first event
+      }
+    } catch (e) {
+      print('Error loading initial wishes: $e');
+      // Optionally show an error to the user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load wishes')),
+        );
+      }
+    }
   }
 
   List<String> getFilters() {
@@ -43,10 +73,10 @@ class _HomeScreenState extends State<HomeScreen> {
         .toSet()
         .toList();
 
-    debugPrint("Categories extracted: $categories");
+    // debugPrint("Categories extracted: $categories");
 
     final filters = ['All', 'Done', 'Undone'];
-    debugPrint("Complete filter list: $filters");
+    // debugPrint("Complete filter list: $filters");
 
     return filters;
   }
@@ -64,49 +94,56 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void addWish(WishItem newWish) {
-  setState(() {
-    wishes.insert(0, newWish); // Tambahkan item baru di bagian atas daftar
-  });
-}
+    if (!mounted) return;
+    setState(() {
+      wishes.insert(0, newWish); // Tambahkan item baru di bagian atas daftar
+    });
+  }
 
-void toggleDone(String id) {
-  setState(() {
-    final index = wishes.indexWhere((wish) => wish.id == id);
-    if (index != -1) {
-      final wish = wishes[index];
-      wish.toggleDone(); // Toggle 'isDone' state
+  void toggleDone(String id) {
+    if (!mounted) return;
+    setState(() {
+      final index = wishes.indexWhere((wish) => wish.id == id);
+      if (index != -1) {
+        final wish = wishes[index];
+        wish.toggleDone();
 
-      // Reorder the list based on 'isDone' status
-      wishes.removeAt(index);
-      if (wish.isDone) {
-        wishes.add(wish); // Pindahkan ke bawah jika selesai (done)
-      } else {
-        wishes.insert(0, wish); // Pindahkan ke atas jika belum selesai (undone)
+        wishes.removeAt(index);
+        if (wish.isDone) {
+          wishes.add(wish);
+        } else {
+          wishes.insert(0, wish);
+        }
       }
-    }
-  });
-}
-
+    });
+  }
 
   void deleteWish(String id) async {
-  try {
-    await FirebaseFirestore.instance.collection('wishlist_2').doc(id).delete();
+    try {
+      await FirebaseFirestore.instance
+          .collection('wishlist_2')
+          .doc(id)
+          .delete();
 
-    setState(() {
-      wishes.removeWhere((wish) => wish.id == id);
-    });
+      if (!mounted) return;
+      setState(() {
+        wishes.removeWhere((wish) => wish.id == id);
+      });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Wishlist successfully deleted')),
-    );
-  } catch (e) {
-    print('Error deleting wishlist: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Failed to delete wishlist')),
-    );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Wishlist successfully deleted')),
+        );
+      }
+    } catch (e) {
+      print('Error deleting wishlist: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete wishlist')),
+        );
+      }
+    }
   }
-}
-
 
   int _currentIndex = 0;
   final PageController _pageController =
@@ -146,7 +183,8 @@ void toggleDone(String id) {
   @override
   Widget build(BuildContext context) {
     final filters = getFilters();
-    debugPrint("Filters used in build: $filters");
+    final filteredWishes = getFilteredWishes();
+    // debugPrint("Filters used in build: $filters");
 
     return Scaffold(
       appBar: AppBar(
@@ -233,9 +271,9 @@ void toggleDone(String id) {
               ),
               Expanded(
                 child: ListView.builder(
-                  itemCount: getFilteredWishes().length,
+                  itemCount: filteredWishes.length,
                   itemBuilder: (context, index) {
-                    final wish = getFilteredWishes()[index];
+                    final wish = filteredWishes[index];
                     return Card(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),

@@ -5,6 +5,7 @@ import 'dart:html' as html;
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:final_project_2/models/wish_item.dart';
 import 'package:final_project_2/screens/detail_screen.dart';
@@ -152,29 +153,54 @@ class _AddItemState extends State<AddItem> {
     return downloadUrls;
   }
 
-  // Save item to Firestore
-  Future<void> _saveItemToFirestore(List<String> base64Images) async {
-    try {
-      await FirebaseFirestore.instance.collection('wishlist_2').add({
-        'title': title,
-        'note': note,
-        'link': link,
-        'price': price,
-        'category': selectedCategory.name,
-        'image': base64Images, // Store base64 encoded images
-        'createdAt': FieldValue.serverTimestamp(),
-        'isDone': false,
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Item added successfully!")),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to add item: $e")),
-      );
+  Future<void> _saveItemToFirestore() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      // Return an error instead of showing SnackBar directly
+      throw Exception("User not logged in");
     }
+
+    // Create a map to store the new item data
+    Map<String, dynamic> newItemData = {
+      'title': title,
+      'note': note,
+      'link': link,
+      'price': price,
+      'category': selectedCategory.name,
+      'image': _selectedImages, // Store base64 encoded images
+      'createdAt': FieldValue.serverTimestamp(),
+      'isDone': false,
+      'uid': user.uid,
+    };
+
+    // Add the new item to the Firestore collection
+    await FirebaseFirestore.instance.collection('wishlist_2').add(newItemData);
   }
+
+  // Save item to Firestore
+  // Future<void> _saveItemToFirestore_2(
+  //     List<String, dynamic> _selectedImages) async {
+  //   try {
+  //     await FirebaseFirestore.instance.collection('wishlist_2').add({
+  //       'title': title,
+  //       'note': note,
+  //       'link': link,
+  //       'price': price,
+  //       'category': selectedCategory.name,
+  //       'image': _selectedImages, // Store base64 encoded images
+  //       'createdAt': FieldValue.serverTimestamp(),
+  //       'isDone': false,
+  //     });
+
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text("Item added successfully!")),
+  //     );
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text("Failed to add item: $e")),
+  //     );
+  //   }
+  // }
 
   Future<List<String>> _convertImagesToBase64() async {
     List<String> base64Images = [];
@@ -184,24 +210,31 @@ class _AddItemState extends State<AddItem> {
         Uint8List imageBytes;
 
         if (kIsWeb) {
-          // For web
-          html.File webFile = image as html.File;
+          // Web: Cast image to html.File and read bytes
+          final webFile = image as html.File;
           imageBytes = await _readFileAsBytes(webFile);
         } else {
-          // For mobile
-          File mobileFile = image as File;
+          // Mobile: Cast image to File and read bytes
+          final mobileFile = image as File;
           imageBytes = await mobileFile.readAsBytes();
         }
 
-        // Convert to base64 with MIME type prefix
-        String base64Image =
-            'data:image/jpeg;base64,' + base64Encode(imageBytes);
+        // Infer MIME type based on image extension (fallback to JPEG)
+        String mimeType = 'image/jpeg'; // Default MIME type
+        if (image is html.File || image is File) {
+          final extension = image.name.split('.').last.toLowerCase();
+          if (extension == 'png') mimeType = 'image/png';
+          if (extension == 'gif') mimeType = 'image/gif';
+          if (extension == 'webp') mimeType = 'image/webp';
+        }
+
+        // Convert to base64 with MIME prefix
+        final base64Image = 'data:$mimeType;base64,${base64Encode(imageBytes)}';
         base64Images.add(base64Image);
       } catch (e) {
         print('Error converting image: $e');
       }
     }
-
     return base64Images;
   }
 
@@ -240,11 +273,8 @@ class _AddItemState extends State<AddItem> {
         ),
         itemCount: _selectedImages.length,
         itemBuilder: (context, index) {
-          final base64Image = _selectedImages[index];
-          final imageBytes = base64Decode(base64Image
-              .split(',')
-              .last); // Remove the prefix "data:image/jpeg;base64," if it's there
-
+          final imageBytes =
+              base64Decode(_selectedImages[index].split(',').last);
           return Stack(
             children: [
               ClipRRect(
@@ -292,10 +322,8 @@ class _AddItemState extends State<AddItem> {
         itemCount: _selectedImages.length,
         itemBuilder: (context, index) {
           // Decode base64 image string into bytes
-          final base64Image = _selectedImages[index];
-          final imageBytes = base64Decode(
-              base64Image.split(',').last); // Remove the prefix if present
-
+          final imageBytes =
+              base64Decode(_selectedImages[index].split(',').last);
           return Stack(
             children: [
               ClipRRect(
@@ -436,28 +464,37 @@ class _AddItemState extends State<AddItem> {
                 onPressed: () async {
                   if (_selectedImages.isNotEmpty) {
                     try {
-                      // Convert images to base64
-                      List<String> base64Images =
-                          await _convertImagesToBase64();
+                      // Save the item to Firestore
+                      await _saveItemToFirestore();
 
-                      // Save item to Firestore with base64 images
-                      await _saveItemToFirestore(base64Images);
+                      // Show success message
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Item added successfully!')),
+                        );
+                      }
 
-                      // Navigate back or clear the form
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => HomeScreen()),
-                      );
+                      // Navigate back
+                      if (mounted) {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (context) => HomeScreen()),
+                        );
+                      }
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Error: $e")),
-                      );
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Error: $e")),
+                        );
+                      }
                     }
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text("Please select at least one image")),
-                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text("Please select at least one image")),
+                      );
+                    }
                   }
                 },
                 child: const Text("Save Item"),
