@@ -96,35 +96,14 @@ class InputForm extends StatefulWidget {
 }
 
 class _InputFormState extends State<InputForm> {
-<<<<<<< HEAD
   final AuthServices _firestoreservice = AuthServices();
-=======
-  final AccountServices _firestoreservice = AccountServices();
->>>>>>> 1789ac33cd312c7c493ac4c20a263a6a124c1375
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
   String? emailErrorMessage;
   String? passwordErrorMessage;
-<<<<<<< HEAD
-=======
-  Map<String, dynamic>? userData;
-  String? userPass;
   bool isLoading = false;
-
-  Future<String?> checkEmailRegistration(String value) async {
-    List<DocumentSnapshot> emailAddress =
-        await _firestoreservice.getAccountInfo(value);
-    if (emailAddress.isEmpty) {
-      return 'Email is not registered';
-    } else {
-      userData = emailAddress.first.data() as Map<String, dynamic>?;
-      userPass = userData?['password'];
-    }
-    return null;
-  }
->>>>>>> 1789ac33cd312c7c493ac4c20a263a6a124c1375
 
   // Email Validation
   String? validateEmail(String value) {
@@ -153,15 +132,8 @@ class _InputFormState extends State<InputForm> {
     // Validate inputs
     String? emailErrorMessage1 = validateEmail(emailController.text);
     String? passwordErrorMessage1 = validatePassword(passwordController.text);
-<<<<<<< HEAD
     String? emailErrorMessage2 = await _firestoreservice.userInDatabase(
         emailController.text, passwordController.text);
-    // User? asd123 = await _firestoreservice.asd123(
-    //     emailController.text, passwordController.text);
-    // String? passwordErrorMessage2 = await _firestoreservice
-    //     .userPasswordInDatabase(emailController.text, passwordController.text);
-    // print(
-    //     'eeeeeeeeeeeeeeeeee: ${emailErrorMessage2}, ${passwordErrorMessage2}');
     setState(() {
       emailErrorMessage = emailErrorMessage1;
       passwordErrorMessage = passwordErrorMessage1 ?? emailErrorMessage2;
@@ -171,99 +143,7 @@ class _InputFormState extends State<InputForm> {
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );
       }
-=======
-    String? emailErrorMessage2;
-
-    try {
-      emailErrorMessage2 = await checkEmailRegistration(emailController.text);
-    } catch (e) {
-      print('Email registration check failed: $e');
-    }
-
-    // Check if still mounted before setState
-    if (!mounted) return;
-
-    setState(() {
-      emailErrorMessage = emailErrorMessage1 ?? emailErrorMessage2;
-      passwordErrorMessage = passwordErrorMessage1;
->>>>>>> 1789ac33cd312c7c493ac4c20a263a6a124c1375
     });
-
-    // Only proceed if no error messages and still mounted
-    if (emailErrorMessage == null && passwordErrorMessage == null) {
-      try {
-        // Check mounted before setting state
-        if (!mounted) return;
-
-        setState(() {
-          isLoading = true;
-        });
-
-        String email = emailController.text.trim();
-        String password = passwordController.text.trim();
-
-        // Sign in the user
-        UserCredential userCredential = await FirebaseAuth.instance
-            .signInWithEmailAndPassword(email: email, password: password);
-
-        // Check if the user is logged in
-        final user = userCredential.user;
-        if (user != null) {
-          print('Logged in as: ${user.uid}');
-
-          // Use Navigator.of(context) instead of direct context navigation
-          if (mounted) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => HomeScreen()),
-            );
-          }
-        } else {
-          print('User login failed');
-
-          // Show error if still mounted
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Login failed. No user found.')),
-            );
-          }
-        }
-      } catch (e) {
-        print('Error during login: $e');
-
-        String errorMessage = 'Login failed. Please check your credentials.';
-
-        if (e is FirebaseAuthException) {
-          switch (e.code) {
-            case 'user-not-found':
-              errorMessage = 'No user found for that email.';
-              break;
-            case 'wrong-password':
-              errorMessage = 'Incorrect password.';
-              break;
-            case 'invalid-email':
-              errorMessage = 'The email address is malformed.';
-              break;
-            default:
-              errorMessage = 'An unknown error occurred.';
-              break;
-          }
-        }
-
-        // Only show SnackBar if still mounted
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(errorMessage)),
-          );
-        }
-      } finally {
-        // Final mounted check before setting state
-        if (mounted) {
-          setState(() {
-            isLoading = false;
-          });
-        }
-      }
-    }
   }
 
   @override
