@@ -1,4 +1,5 @@
 import 'package:final_project_2/services/fireStoreService.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_2/screens/home_screen.dart';
 import 'package:final_project_2/screens/signup_screen.dart';
@@ -132,16 +133,29 @@ class _InputFormState extends State<InputForm> {
     String? passwordErrorMessage1 = validatePassword(passwordController.text);
     String? emailErrorMessage2 = await _firestoreservice.userInDatabase(
         emailController.text, passwordController.text);
+
+    if (!mounted) return;
+
     setState(() {
       emailErrorMessage = emailErrorMessage1;
       passwordErrorMessage = passwordErrorMessage1 ?? emailErrorMessage2;
       if (emailErrorMessage == null && passwordErrorMessage == null) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
-        );
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => HomeScreen()),
+          );
+        }
       }
     });
+    if (!mounted) return;
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+    UserCredential userCredential = await FirebaseAuth.instance
+        .signInWithEmailAndPassword(email: email, password: password);
+    final user = userCredential.user;
+    // if (user != null) {
+    //   print('Logged in as: ${user.uid}');
+    // }
   }
 
   @override
