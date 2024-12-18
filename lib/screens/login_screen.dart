@@ -1,6 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_project_2/services/fireStoreService.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_2/screens/home_screen.dart';
 import 'package:final_project_2/screens/signup_screen.dart';

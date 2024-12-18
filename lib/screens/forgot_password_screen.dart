@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:final_project_2/services/fireStoreService.dart';
-import 'package:final_project_2/screens/reset_password.dart';
 import 'package:flutter/material.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
